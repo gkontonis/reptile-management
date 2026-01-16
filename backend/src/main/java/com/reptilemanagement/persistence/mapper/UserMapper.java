@@ -9,6 +9,9 @@ import org.mapstruct.Mapping;
 
 /**
  * MapStruct mapper for User entity and its DTOs.
+ * <p>
+ * Note: User entity does not extend BaseEntity, so this mapper does not extend BaseMapper.
+ * However, it still follows similar patterns for audit field handling.
  */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -26,6 +29,7 @@ public interface UserMapper {
 
     /**
      * Map CreateUserRequest to User entity.
+     * Audit fields and password are ignored as they're set by the service layer.
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
