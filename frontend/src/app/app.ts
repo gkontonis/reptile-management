@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { SidebarComponent } from './shared/components/sidebar/sidebar';
 import { SidebarService } from './shared/services/sidebar.service';
 import { PerformanceService } from './core/services/performance.service';
+import { AuthService } from './core/services/auth.service';
 
 
 /**
@@ -21,6 +22,7 @@ export class App implements OnInit {
   protected title = 'home-management-app';
 
   sidebarService = inject(SidebarService);
+  authService = inject(AuthService);
   private performanceService = inject(PerformanceService);
 
   ngOnInit(): void {
