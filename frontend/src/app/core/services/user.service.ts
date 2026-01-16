@@ -105,4 +105,13 @@ export class UserService {
       newPassword
     });
   }
+
+  /**
+   * Update own username (any authenticated user).
+   */
+  updateUsername(newUsername: string): Observable<{message: string; username: string}> {
+    return this.http.put<{message: string; username: string}>(`${this.API_URL}/username`, {
+      username: newUsername
+    });
+  }
 }

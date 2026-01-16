@@ -2,6 +2,7 @@ import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
@@ -23,6 +24,7 @@ export class ProfileSettings {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private authService: AuthService,
     private userService: UserService,
     private sanitizationService: SanitizationService
   ) {
@@ -55,14 +57,24 @@ export class ProfileSettings {
       const rawUsername = this.profileForm.value.username;
       const sanitizedUsername = this.sanitizationService.sanitizeUsername(rawUsername);
 
-      this.successMessage.set('Username updated successfully!');
-      this.errorMessage.set('');
-      // TODO: Implement actual API call to update username
-      console.log('Updating username to:', sanitizedUsername);
+      this.userService.updateUsername(sanitizedUsername).subscribe({
+        next: (response) => {
+          // Update the username in the auth service to trigger UI updates
+          this.authService.updateUsername(response.username);
 
-      setTimeout(() => {
-        this.successMessage.set('');
-      }, 3000);
+          this.successMessage.set('Username updated successfully! Please log in again with your new username.');
+          this.errorMessage.set('');
+
+          // Logout after 2 seconds to force re-authentication with new username
+          setTimeout(() => {
+            this.authService.logout();
+          }, 2000);
+        },
+        error: (error) => {
+          this.errorMessage.set(error.error?.error || 'Failed to update username. Please try again.');
+          this.successMessage.set('');
+        }
+      });
     }
   }
 

@@ -163,4 +163,44 @@ public class UserController {
 
         return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
     }
+
+    /**
+     * Update own username (any authenticated user).
+     */
+    @PutMapping("/username")
+    public ResponseEntity<?> updateUsername(
+            @RequestBody Map<String, String> usernameData,
+            Authentication authentication) {
+
+        String newUsername = usernameData.get("username");
+
+        if (newUsername == null || newUsername.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Username is required"));
+        }
+
+        if (newUsername.length() < 3) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Username must be at least 3 characters"));
+        }
+
+        String currentUsername = authentication.getName();
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if new username is already taken (by another user)
+        if (!newUsername.equals(currentUsername) && userRepository.findByUsername(newUsername).isPresent()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Username is already taken"));
+        }
+
+        // Update username
+        user.setUsername(newUsername);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Username updated successfully",
+                "username", newUsername
+        ));
+    }
 }

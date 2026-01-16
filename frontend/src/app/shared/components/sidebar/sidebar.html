@@ -3,7 +3,7 @@
      [class.-translate-x-full]="collapsed()">
   <!-- Header -->
   <div class="p-4 border-b border-primary-content/20 flex items-center justify-center relative">
-    <h2 class="text-lg font-semibold" [class.hidden]="collapsed()">Home Management</h2>
+    <h2 class="text-lg font-semibold" [class.hidden]="collapsed()">Reptile Management</h2>
   </div>
 
   <!-- Toggle button positioned outside -->
@@ -79,7 +79,7 @@
     <!-- User Info and Logout -->
     <div class="flex flex-col gap-2">
       <div class="text-sm" [class.hidden]="collapsed()">
-        Welcome, {{ username() }}
+        {{ username() }}
       </div>
       <button class="btn btn-ghost btn-sm w-full justify-start" [class.btn-circle]="collapsed()" (click)="logout()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

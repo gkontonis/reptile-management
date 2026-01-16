@@ -98,6 +98,23 @@ export class AuthService {
   }
 
   /**
+   * Updates the current user's username in the authentication state.
+   * This should be called after a successful username update.
+   * @param newUsername - The new username to set
+   */
+  updateUsername(newUsername: string): void {
+    const user = this.currentUser();
+    if (user) {
+      const updatedUser: AuthUser = {
+        ...user,
+        username: newUsername
+      };
+      localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
+      this.currentUser.set(updatedUser);
+    }
+  }
+
+  /**
    * Checks if a valid token exists in localStorage.
    * @private
    * @returns True if a token exists, false otherwise

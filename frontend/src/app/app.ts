@@ -7,7 +7,7 @@ import { PerformanceService } from './core/services/performance.service';
 
 
 /**
- * Root component of the Home Management application.
+ * Root component of the application.
  * Serves as the main application shell containing the router outlet and navigation.
  */
 @Component({
