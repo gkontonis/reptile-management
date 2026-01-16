@@ -6,7 +6,7 @@ A comprehensive web application designed to help reptile enthusiasts and profess
 
 ### Dashboard Overview
 ![Dashboard](docs/screenshots/dashboard.png)
-*Main dashboard showing your reptile collection at a glance*
+*Main dashboard showing reptile collection at a glance*
 
 ### Reptile Details
 ![Reptile Details](docs/screenshots/reptile-detail.png)
@@ -24,7 +24,7 @@ A comprehensive web application designed to help reptile enthusiasts and profess
 
 **Reptile Collection Management**
 - Maintain detailed profiles for each reptile (species, morph, age, gender)
-- Upload and organize photos of your animals
+- Upload and organize photos of animals
 - Quick access to all important care information
 
 **Health Monitoring**
