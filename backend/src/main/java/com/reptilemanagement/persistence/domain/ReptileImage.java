@@ -1,6 +1,8 @@
 package com.reptilemanagement.persistence.domain;
 
 import com.reptilemanagement.persistence.domain.base.BaseEntity;
+import com.reptilemanagement.persistence.domain.base.EntityUpdatable;
+import com.reptilemanagement.persistence.dto.ReptileImageDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReptileImage extends BaseEntity<Long> {
+public class ReptileImage extends BaseEntity<Long> implements EntityUpdatable<ReptileImageDto> {
     /** Unique identifier for the image */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,4 +49,22 @@ public class ReptileImage extends BaseEntity<Long> {
     /** Size of the image in bytes */
     @Column(nullable = false)
     private Long size;
+
+    @Override
+    public void update(ReptileImageDto dto) {
+        if (dto.getReptileId() != null) {
+            this.reptileId = dto.getReptileId();
+        }
+        if (dto.getFilename() != null) {
+            this.filename = dto.getFilename();
+        }
+        if (dto.getContentType() != null) {
+            this.contentType = dto.getContentType();
+        }
+        this.description = dto.getDescription();
+        if (dto.getSize() != null) {
+            this.size = dto.getSize();
+        }
+        // Note: imageData is not updated from DTO as it's excluded from the DTO
+    }
 }

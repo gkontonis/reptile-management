@@ -1,6 +1,8 @@
 package com.reptilemanagement.persistence.domain;
 
 import com.reptilemanagement.persistence.domain.base.BaseEntity;
+import com.reptilemanagement.persistence.domain.base.EntityUpdatable;
+import com.reptilemanagement.persistence.dto.EnclosureCleaningDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +21,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class EnclosureCleaning extends BaseEntity<Long> {
+public class EnclosureCleaning extends BaseEntity<Long> implements EntityUpdatable<EnclosureCleaningDto> {
     /** Unique identifier for the enclosure cleaning entry */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,5 +55,25 @@ public class EnclosureCleaning extends BaseEntity<Long> {
     /** Enumeration of possible cleaning types */
     public enum CleaningType {
         SPOT_CLEAN, FULL_CLEAN, WATER_CHANGE, DEEP_CLEAN
+    }
+
+    @Override
+    public void update(EnclosureCleaningDto dto) {
+        if (dto.getEnclosureId() != null) {
+            this.enclosureId = dto.getEnclosureId();
+        }
+        if (dto.getCleaningDate() != null) {
+            this.cleaningDate = dto.getCleaningDate();
+        }
+        if (dto.getCleaningType() != null) {
+            this.cleaningType = dto.getCleaningType();
+        }
+        if (dto.getSubstrateChanged() != null) {
+            this.substrateChanged = dto.getSubstrateChanged();
+        }
+        if (dto.getDisinfected() != null) {
+            this.disinfected = dto.getDisinfected();
+        }
+        this.notes = dto.getNotes();
     }
 }

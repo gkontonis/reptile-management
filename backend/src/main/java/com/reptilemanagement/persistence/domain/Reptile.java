@@ -1,6 +1,8 @@
 package com.reptilemanagement.persistence.domain;
 
 import com.reptilemanagement.persistence.domain.base.BaseEntity;
+import com.reptilemanagement.persistence.domain.base.EntityUpdatable;
+import com.reptilemanagement.persistence.dto.ReptileDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +21,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reptile extends BaseEntity<Long> {
+public class Reptile extends BaseEntity<Long> implements EntityUpdatable<ReptileDto> {
     /** Unique identifier for the reptile */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,5 +74,35 @@ public class Reptile extends BaseEntity<Long> {
     /** Enumeration of possible reptile status values */
     public enum ReptileStatus {
         ACTIVE, QUARANTINE, DECEASED, SOLD
+    }
+
+    /**
+     * Updates this entity from a DTO.
+     * Only updates business fields, not ID or audit fields.
+     *
+     * @param dto the DTO containing new values
+     */
+    @Override
+    public void update(ReptileDto dto) {
+        if (dto.getName() != null) {
+            this.name = dto.getName();
+        }
+        if (dto.getSpecies() != null) {
+            this.species = dto.getSpecies();
+        }
+        this.subspecies = dto.getSubspecies();
+        if (dto.getGender() != null) {
+            this.gender = dto.getGender();
+        }
+        this.birthDate = dto.getBirthDate();
+        if (dto.getAcquisitionDate() != null) {
+            this.acquisitionDate = dto.getAcquisitionDate();
+        }
+        this.enclosureId = dto.getEnclosureId();
+        if (dto.getStatus() != null) {
+            this.status = dto.getStatus();
+        }
+        this.notes = dto.getNotes();
+        this.highlightImageId = dto.getHighlightImageId();
     }
 }

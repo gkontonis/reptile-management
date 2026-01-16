@@ -3,13 +3,18 @@ package com.reptilemanagement.rest.service;
 import com.reptilemanagement.persistence.domain.FeedingLog;
 import com.reptilemanagement.persistence.dto.FeedingLogDto;
 import com.reptilemanagement.persistence.mapper.FeedingLogMapper;
+import com.reptilemanagement.persistence.mapper.base.BaseMapper;
 import com.reptilemanagement.persistence.repository.FeedingLogRepository;
+import com.reptilemanagement.rest.service.base.BaseCrudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,10 +27,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class FeedingLogService {
+public class FeedingLogService extends BaseCrudService<Long, FeedingLog, FeedingLogDto> {
 
     private final FeedingLogRepository feedingLogRepository;
     private final FeedingLogMapper feedingLogMapper;
+
+    @Override
+    protected JpaRepository<FeedingLog, Long> getRepository() {
+        return feedingLogRepository;
+    }
+
+    @Override
+    protected BaseMapper<FeedingLog, FeedingLogDto> getMapper() {
+        return feedingLogMapper;
+    }
+
+    @Override
+    public Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.DESC, "feedingDate");
+    }
 
     /**
      * Creates a new feeding log entry.
@@ -34,12 +54,7 @@ public class FeedingLogService {
      */
     public FeedingLogDto createFeedingLog(FeedingLogDto feedingLogDto) {
         log.info("Creating feeding log for reptile: {}", feedingLogDto.getReptileId());
-
-        FeedingLog feedingLog = feedingLogMapper.toEntity(feedingLogDto);
-        FeedingLog savedFeedingLog = feedingLogRepository.save(feedingLog);
-
-        log.info("Created feeding log with ID: {}", savedFeedingLog.getId());
-        return feedingLogMapper.toDto(savedFeedingLog);
+        return create(feedingLogDto, new HashMap<>());
     }
 
     /**
@@ -50,9 +65,11 @@ public class FeedingLogService {
     @Transactional(readOnly = true)
     public Optional<FeedingLogDto> getFeedingLogById(Long id) {
         log.debug("Retrieving feeding log with ID: {}", id);
-
-        return feedingLogRepository.findById(id)
-                .map(feedingLogMapper::toDto);
+        try {
+            return Optional.of(findById(id, new HashMap<>()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -120,17 +137,13 @@ public class FeedingLogService {
      */
     public Optional<FeedingLogDto> updateFeedingLog(Long id, FeedingLogDto feedingLogDto) {
         log.info("Updating feeding log with ID: {}", id);
-
-        return feedingLogRepository.findById(id)
-                .map(existingLog -> {
-                    FeedingLog updatedLog = feedingLogMapper.toEntity(feedingLogDto);
-                    updatedLog.setId(id);
-                    updatedLog.setCreatedAt(existingLog.getCreatedAt());
-                    FeedingLog savedLog = feedingLogRepository.save(updatedLog);
-
-                    log.info("Updated feeding log with ID: {}", id);
-                    return feedingLogMapper.toDto(savedLog);
-                });
+        try {
+            feedingLogDto.setId(id);
+            return Optional.of(update(feedingLogDto, new HashMap<>()));
+        } catch (Exception e) {
+            log.error("Error updating feeding log with ID: {}", id, e);
+            return Optional.empty();
+        }
     }
 
     /**
@@ -142,7 +155,7 @@ public class FeedingLogService {
         log.info("Deleting feeding log with ID: {}", id);
 
         if (feedingLogRepository.existsById(id)) {
-            feedingLogRepository.deleteById(id);
+            deleteById(id);
             log.info("Deleted feeding log with ID: {}", id);
             return true;
         }

@@ -1,6 +1,8 @@
 package com.reptilemanagement.persistence.domain;
 
 import com.reptilemanagement.persistence.domain.base.BaseEntity;
+import com.reptilemanagement.persistence.domain.base.EntityUpdatable;
+import com.reptilemanagement.persistence.dto.WeightLogDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +22,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeightLog extends BaseEntity<Long> {
+public class WeightLog extends BaseEntity<Long> implements EntityUpdatable<WeightLogDto> {
     /** Unique identifier for the weight log entry */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,4 +43,18 @@ public class WeightLog extends BaseEntity<Long> {
     /** Additional notes about the weight measurement */
     @Column(length = 500)
     private String notes;
+
+    @Override
+    public void update(WeightLogDto dto) {
+        if (dto.getReptileId() != null) {
+            this.reptileId = dto.getReptileId();
+        }
+        if (dto.getMeasurementDate() != null) {
+            this.measurementDate = dto.getMeasurementDate();
+        }
+        if (dto.getWeightGrams() != null) {
+            this.weightGrams = dto.getWeightGrams();
+        }
+        this.notes = dto.getNotes();
+    }
 }

@@ -3,15 +3,20 @@ package com.reptilemanagement.rest.service;
 import com.reptilemanagement.persistence.domain.ReptileImage;
 import com.reptilemanagement.persistence.dto.ReptileImageDto;
 import com.reptilemanagement.persistence.mapper.ReptileImageMapper;
+import com.reptilemanagement.persistence.mapper.base.BaseMapper;
 import com.reptilemanagement.persistence.repository.ReptileImageRepository;
 import com.reptilemanagement.persistence.repository.ReptileRepository;
+import com.reptilemanagement.rest.service.base.BaseCrudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,11 +31,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class ReptileImageService {
+public class ReptileImageService extends BaseCrudService<Long, ReptileImage, ReptileImageDto> {
 
     private final ReptileImageRepository reptileImageRepository;
     private final ReptileRepository reptileRepository;
     private final ReptileImageMapper reptileImageMapper;
+
+    @Override
+    protected JpaRepository<ReptileImage, Long> getRepository() {
+        return reptileImageRepository;
+    }
+
+    @Override
+    protected BaseMapper<ReptileImage, ReptileImageDto> getMapper() {
+        return reptileImageMapper;
+    }
+
+    @Override
+    public Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.DESC, "createdAt");
+    }
 
     /** Supported image content types */
     private static final Set<String> SUPPORTED_CONTENT_TYPES = Set.of(

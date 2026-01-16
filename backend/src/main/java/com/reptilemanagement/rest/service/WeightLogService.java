@@ -3,14 +3,19 @@ package com.reptilemanagement.rest.service;
 import com.reptilemanagement.persistence.domain.WeightLog;
 import com.reptilemanagement.persistence.dto.WeightLogDto;
 import com.reptilemanagement.persistence.mapper.WeightLogMapper;
+import com.reptilemanagement.persistence.mapper.base.BaseMapper;
 import com.reptilemanagement.persistence.repository.WeightLogRepository;
+import com.reptilemanagement.rest.service.base.BaseCrudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,10 +28,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class WeightLogService {
+public class WeightLogService extends BaseCrudService<Long, WeightLog, WeightLogDto> {
 
     private final WeightLogRepository weightLogRepository;
     private final WeightLogMapper weightLogMapper;
+
+    @Override
+    protected JpaRepository<WeightLog, Long> getRepository() {
+        return weightLogRepository;
+    }
+
+    @Override
+    protected BaseMapper<WeightLog, WeightLogDto> getMapper() {
+        return weightLogMapper;
+    }
+
+    @Override
+    public Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.DESC, "measurementDate");
+    }
 
     /**
      * Creates a new weight log entry.
@@ -35,12 +55,7 @@ public class WeightLogService {
      */
     public WeightLogDto createWeightLog(WeightLogDto weightLogDto) {
         log.info("Creating weight log for reptile: {}", weightLogDto.getReptileId());
-
-        WeightLog weightLog = weightLogMapper.toEntity(weightLogDto);
-        WeightLog savedWeightLog = weightLogRepository.save(weightLog);
-
-        log.info("Created weight log with ID: {}", savedWeightLog.getId());
-        return weightLogMapper.toDto(savedWeightLog);
+        return create(weightLogDto, new HashMap<>());
     }
 
     /**
@@ -51,9 +66,11 @@ public class WeightLogService {
     @Transactional(readOnly = true)
     public Optional<WeightLogDto> getWeightLogById(Long id) {
         log.debug("Retrieving weight log with ID: {}", id);
-
-        return weightLogRepository.findById(id)
-                .map(weightLogMapper::toDto);
+        try {
+            return Optional.of(findById(id, new HashMap<>()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -134,17 +151,13 @@ public class WeightLogService {
      */
     public Optional<WeightLogDto> updateWeightLog(Long id, WeightLogDto weightLogDto) {
         log.info("Updating weight log with ID: {}", id);
-
-        return weightLogRepository.findById(id)
-                .map(existingLog -> {
-                    WeightLog updatedLog = weightLogMapper.toEntity(weightLogDto);
-                    updatedLog.setId(id);
-                    updatedLog.setCreatedAt(existingLog.getCreatedAt());
-                    WeightLog savedLog = weightLogRepository.save(updatedLog);
-
-                    log.info("Updated weight log with ID: {}", id);
-                    return weightLogMapper.toDto(savedLog);
-                });
+        try {
+            weightLogDto.setId(id);
+            return Optional.of(update(weightLogDto, new HashMap<>()));
+        } catch (Exception e) {
+            log.error("Error updating weight log with ID: {}", id, e);
+            return Optional.empty();
+        }
     }
 
     /**
@@ -156,7 +169,7 @@ public class WeightLogService {
         log.info("Deleting weight log with ID: {}", id);
 
         if (weightLogRepository.existsById(id)) {
-            weightLogRepository.deleteById(id);
+            deleteById(id);
             log.info("Deleted weight log with ID: {}", id);
             return true;
         }

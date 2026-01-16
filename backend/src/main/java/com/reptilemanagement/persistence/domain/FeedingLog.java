@@ -1,6 +1,8 @@
 package com.reptilemanagement.persistence.domain;
 
 import com.reptilemanagement.persistence.domain.base.BaseEntity;
+import com.reptilemanagement.persistence.domain.base.EntityUpdatable;
+import com.reptilemanagement.persistence.dto.FeedingLogDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +21,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeedingLog extends BaseEntity<Long> {
+public class FeedingLog extends BaseEntity<Long> implements EntityUpdatable<FeedingLogDto> {
     /** Unique identifier for the feeding log entry */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,4 +50,24 @@ public class FeedingLog extends BaseEntity<Long> {
     /** Additional notes about the feeding */
     @Column(length = 500)
     private String notes;
+
+    @Override
+    public void update(FeedingLogDto dto) {
+        if (dto.getReptileId() != null) {
+            this.reptileId = dto.getReptileId();
+        }
+        if (dto.getFeedingDate() != null) {
+            this.feedingDate = dto.getFeedingDate();
+        }
+        if (dto.getFoodType() != null) {
+            this.foodType = dto.getFoodType();
+        }
+        if (dto.getQuantity() != null) {
+            this.quantity = dto.getQuantity();
+        }
+        if (dto.getAte() != null) {
+            this.ate = dto.getAte();
+        }
+        this.notes = dto.getNotes();
+    }
 }

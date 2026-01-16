@@ -3,12 +3,17 @@ package com.reptilemanagement.rest.service;
 import com.reptilemanagement.persistence.domain.Enclosure;
 import com.reptilemanagement.persistence.dto.EnclosureDto;
 import com.reptilemanagement.persistence.mapper.EnclosureMapper;
+import com.reptilemanagement.persistence.mapper.base.BaseMapper;
 import com.reptilemanagement.persistence.repository.EnclosureRepository;
+import com.reptilemanagement.rest.service.base.BaseCrudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,10 +26,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class EnclosureService {
+public class EnclosureService extends BaseCrudService<Long, Enclosure, EnclosureDto> {
 
     private final EnclosureRepository enclosureRepository;
     private final EnclosureMapper enclosureMapper;
+
+    @Override
+    protected JpaRepository<Enclosure, Long> getRepository() {
+        return enclosureRepository;
+    }
+
+    @Override
+    protected BaseMapper<Enclosure, EnclosureDto> getMapper() {
+        return enclosureMapper;
+    }
+
+    @Override
+    public Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.ASC, "name");
+    }
 
     /**
      * Creates a new enclosure.
@@ -33,12 +53,7 @@ public class EnclosureService {
      */
     public EnclosureDto createEnclosure(EnclosureDto enclosureDto) {
         log.info("Creating new enclosure: {}", enclosureDto.getName());
-
-        Enclosure enclosure = enclosureMapper.toEntity(enclosureDto);
-        Enclosure savedEnclosure = enclosureRepository.save(enclosure);
-
-        log.info("Created enclosure with ID: {}", savedEnclosure.getId());
-        return enclosureMapper.toDto(savedEnclosure);
+        return create(enclosureDto, new HashMap<>());
     }
 
     /**
@@ -49,9 +64,11 @@ public class EnclosureService {
     @Transactional(readOnly = true)
     public Optional<EnclosureDto> getEnclosureById(Long id) {
         log.debug("Retrieving enclosure with ID: {}", id);
-
-        return enclosureRepository.findById(id)
-                .map(enclosureMapper::toDto);
+        try {
+            return Optional.of(findById(id, new HashMap<>()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -127,17 +144,13 @@ public class EnclosureService {
      */
     public Optional<EnclosureDto> updateEnclosure(Long id, EnclosureDto enclosureDto) {
         log.info("Updating enclosure with ID: {}", id);
-
-        return enclosureRepository.findById(id)
-                .map(existingEnclosure -> {
-                    Enclosure updatedEnclosure = enclosureMapper.toEntity(enclosureDto);
-                    updatedEnclosure.setId(id);
-                    updatedEnclosure.setCreatedAt(existingEnclosure.getCreatedAt());
-                    Enclosure savedEnclosure = enclosureRepository.save(updatedEnclosure);
-
-                    log.info("Updated enclosure with ID: {}", id);
-                    return enclosureMapper.toDto(savedEnclosure);
-                });
+        try {
+            enclosureDto.setId(id);
+            return Optional.of(update(enclosureDto, new HashMap<>()));
+        } catch (Exception e) {
+            log.error("Error updating enclosure with ID: {}", id, e);
+            return Optional.empty();
+        }
     }
 
     /**
@@ -149,7 +162,7 @@ public class EnclosureService {
         log.info("Deleting enclosure with ID: {}", id);
 
         if (enclosureRepository.existsById(id)) {
-            enclosureRepository.deleteById(id);
+            deleteById(id);
             log.info("Deleted enclosure with ID: {}", id);
             return true;
         }

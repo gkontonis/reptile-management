@@ -3,13 +3,18 @@ package com.reptilemanagement.rest.service;
 import com.reptilemanagement.persistence.domain.SheddingLog;
 import com.reptilemanagement.persistence.dto.SheddingLogDto;
 import com.reptilemanagement.persistence.mapper.SheddingLogMapper;
+import com.reptilemanagement.persistence.mapper.base.BaseMapper;
 import com.reptilemanagement.persistence.repository.SheddingLogRepository;
+import com.reptilemanagement.rest.service.base.BaseCrudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,10 +27,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class SheddingLogService {
+public class SheddingLogService extends BaseCrudService<Long, SheddingLog, SheddingLogDto> {
 
     private final SheddingLogRepository sheddingLogRepository;
     private final SheddingLogMapper sheddingLogMapper;
+
+    @Override
+    protected JpaRepository<SheddingLog, Long> getRepository() {
+        return sheddingLogRepository;
+    }
+
+    @Override
+    protected BaseMapper<SheddingLog, SheddingLogDto> getMapper() {
+        return sheddingLogMapper;
+    }
+
+    @Override
+    public Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.DESC, "sheddingDate");
+    }
 
     /**
      * Creates a new shedding log entry.
@@ -34,12 +54,7 @@ public class SheddingLogService {
      */
     public SheddingLogDto createSheddingLog(SheddingLogDto sheddingLogDto) {
         log.info("Creating shedding log for reptile: {}", sheddingLogDto.getReptileId());
-
-        SheddingLog sheddingLog = sheddingLogMapper.toEntity(sheddingLogDto);
-        SheddingLog savedSheddingLog = sheddingLogRepository.save(sheddingLog);
-
-        log.info("Created shedding log with ID: {}", savedSheddingLog.getId());
-        return sheddingLogMapper.toDto(savedSheddingLog);
+        return create(sheddingLogDto, new HashMap<>());
     }
 
     /**
@@ -50,9 +65,11 @@ public class SheddingLogService {
     @Transactional(readOnly = true)
     public Optional<SheddingLogDto> getSheddingLogById(Long id) {
         log.debug("Retrieving shedding log with ID: {}", id);
-
-        return sheddingLogRepository.findById(id)
-                .map(sheddingLogMapper::toDto);
+        try {
+            return Optional.of(findById(id, new HashMap<>()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -120,17 +137,13 @@ public class SheddingLogService {
      */
     public Optional<SheddingLogDto> updateSheddingLog(Long id, SheddingLogDto sheddingLogDto) {
         log.info("Updating shedding log with ID: {}", id);
-
-        return sheddingLogRepository.findById(id)
-                .map(existingLog -> {
-                    SheddingLog updatedLog = sheddingLogMapper.toEntity(sheddingLogDto);
-                    updatedLog.setId(id);
-                    updatedLog.setCreatedAt(existingLog.getCreatedAt());
-                    SheddingLog savedLog = sheddingLogRepository.save(updatedLog);
-
-                    log.info("Updated shedding log with ID: {}", id);
-                    return sheddingLogMapper.toDto(savedLog);
-                });
+        try {
+            sheddingLogDto.setId(id);
+            return Optional.of(update(sheddingLogDto, new HashMap<>()));
+        } catch (Exception e) {
+            log.error("Error updating shedding log with ID: {}", id, e);
+            return Optional.empty();
+        }
     }
 
     /**
@@ -142,7 +155,7 @@ public class SheddingLogService {
         log.info("Deleting shedding log with ID: {}", id);
 
         if (sheddingLogRepository.existsById(id)) {
-            sheddingLogRepository.deleteById(id);
+            deleteById(id);
             log.info("Deleted shedding log with ID: {}", id);
             return true;
         }

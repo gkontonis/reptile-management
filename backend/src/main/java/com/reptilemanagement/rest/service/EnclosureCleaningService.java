@@ -3,13 +3,18 @@ package com.reptilemanagement.rest.service;
 import com.reptilemanagement.persistence.domain.EnclosureCleaning;
 import com.reptilemanagement.persistence.dto.EnclosureCleaningDto;
 import com.reptilemanagement.persistence.mapper.EnclosureCleaningMapper;
+import com.reptilemanagement.persistence.mapper.base.BaseMapper;
 import com.reptilemanagement.persistence.repository.EnclosureCleaningRepository;
+import com.reptilemanagement.rest.service.base.BaseCrudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,10 +27,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class EnclosureCleaningService {
+public class EnclosureCleaningService extends BaseCrudService<Long, EnclosureCleaning, EnclosureCleaningDto> {
 
     private final EnclosureCleaningRepository enclosureCleaningRepository;
     private final EnclosureCleaningMapper enclosureCleaningMapper;
+
+    @Override
+    protected JpaRepository<EnclosureCleaning, Long> getRepository() {
+        return enclosureCleaningRepository;
+    }
+
+    @Override
+    protected BaseMapper<EnclosureCleaning, EnclosureCleaningDto> getMapper() {
+        return enclosureCleaningMapper;
+    }
+
+    @Override
+    public Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.DESC, "cleaningDate");
+    }
 
     /**
      * Creates a new enclosure cleaning log entry.
@@ -34,12 +54,7 @@ public class EnclosureCleaningService {
      */
     public EnclosureCleaningDto createEnclosureCleaning(EnclosureCleaningDto enclosureCleaningDto) {
         log.info("Creating enclosure cleaning log for enclosure: {}", enclosureCleaningDto.getEnclosureId());
-
-        EnclosureCleaning enclosureCleaning = enclosureCleaningMapper.toEntity(enclosureCleaningDto);
-        EnclosureCleaning savedEnclosureCleaning = enclosureCleaningRepository.save(enclosureCleaning);
-
-        log.info("Created enclosure cleaning log with ID: {}", savedEnclosureCleaning.getId());
-        return enclosureCleaningMapper.toDto(savedEnclosureCleaning);
+        return create(enclosureCleaningDto, new HashMap<>());
     }
 
     /**
@@ -50,9 +65,11 @@ public class EnclosureCleaningService {
     @Transactional(readOnly = true)
     public Optional<EnclosureCleaningDto> getEnclosureCleaningById(Long id) {
         log.debug("Retrieving enclosure cleaning log with ID: {}", id);
-
-        return enclosureCleaningRepository.findById(id)
-                .map(enclosureCleaningMapper::toDto);
+        try {
+            return Optional.of(findById(id, new HashMap<>()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**

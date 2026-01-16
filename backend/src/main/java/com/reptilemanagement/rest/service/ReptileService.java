@@ -4,13 +4,18 @@ import com.reptilemanagement.persistence.domain.Reptile;
 import com.reptilemanagement.persistence.domain.ReptileImage;
 import com.reptilemanagement.persistence.dto.ReptileDto;
 import com.reptilemanagement.persistence.mapper.ReptileMapper;
+import com.reptilemanagement.persistence.mapper.base.BaseMapper;
 import com.reptilemanagement.persistence.repository.ReptileImageRepository;
 import com.reptilemanagement.persistence.repository.ReptileRepository;
+import com.reptilemanagement.rest.service.base.BaseCrudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,11 +28,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class ReptileService {
+public class ReptileService extends BaseCrudService<Long, Reptile, ReptileDto> {
 
     private final ReptileRepository reptileRepository;
     private final ReptileImageRepository reptileImageRepository;
     private final ReptileMapper reptileMapper;
+
+    @Override
+    protected JpaRepository<Reptile, Long> getRepository() {
+        return reptileRepository;
+    }
+
+    @Override
+    protected BaseMapper<Reptile, ReptileDto> getMapper() {
+        return reptileMapper;
+    }
+
+    @Override
+    public Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.ASC, "name");
+    }
 
     /**
      * Creates a new reptile.
@@ -36,12 +56,7 @@ public class ReptileService {
      */
     public ReptileDto createReptile(ReptileDto reptileDto) {
         log.info("Creating new reptile: {}", reptileDto.getName());
-
-        Reptile reptile = reptileMapper.toEntity(reptileDto);
-        Reptile savedReptile = reptileRepository.save(reptile);
-
-        log.info("Created reptile with ID: {}", savedReptile.getId());
-        return reptileMapper.toDto(savedReptile);
+        return create(reptileDto, new HashMap<>());
     }
 
     /**
@@ -52,9 +67,11 @@ public class ReptileService {
     @Transactional(readOnly = true)
     public Optional<ReptileDto> getReptileById(Long id) {
         log.debug("Retrieving reptile with ID: {}", id);
-
-        return reptileRepository.findById(id)
-                .map(reptileMapper::toDto);
+        try {
+            return Optional.of(findById(id, new HashMap<>()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -133,17 +150,14 @@ public class ReptileService {
      */
     public Optional<ReptileDto> updateReptile(Long id, ReptileDto reptileDto) {
         log.info("Updating reptile with ID: {}", id);
-
-        return reptileRepository.findById(id)
-                .map(existingReptile -> {
-                    Reptile updatedReptile = reptileMapper.toEntity(reptileDto);
-                    updatedReptile.setId(id);
-                    updatedReptile.setCreatedAt(existingReptile.getCreatedAt());
-                    Reptile savedReptile = reptileRepository.save(updatedReptile);
-
-                    log.info("Updated reptile with ID: {}", id);
-                    return reptileMapper.toDto(savedReptile);
-                });
+        
+        try {
+            reptileDto.setId(id);
+            return Optional.of(update(reptileDto, new HashMap<>()));
+        } catch (Exception e) {
+            log.error("Error updating reptile with ID: {}", id, e);
+            return Optional.empty();
+        }
     }
 
     /**
@@ -155,7 +169,7 @@ public class ReptileService {
         log.info("Deleting reptile with ID: {}", id);
 
         if (reptileRepository.existsById(id)) {
-            reptileRepository.deleteById(id);
+            deleteById(id);
             log.info("Deleted reptile with ID: {}", id);
             return true;
         }

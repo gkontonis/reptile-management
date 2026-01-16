@@ -1,6 +1,8 @@
 package com.reptilemanagement.persistence.domain;
 
 import com.reptilemanagement.persistence.domain.base.BaseEntity;
+import com.reptilemanagement.persistence.domain.base.EntityUpdatable;
+import com.reptilemanagement.persistence.dto.EnclosureDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Enclosure extends BaseEntity<Long> {
+public class Enclosure extends BaseEntity<Long> implements EntityUpdatable<EnclosureDto> {
     /** Unique identifier for the enclosure */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,5 +59,22 @@ public class Enclosure extends BaseEntity<Long> {
     /** Enumeration of possible enclosure types */
     public enum EnclosureType {
         TERRARIUM, VIVARIUM, PALUDARIUM, AQUATERRAIUM, CUSTOM
+    }
+
+    @Override
+    public void update(EnclosureDto dto) {
+        if (dto.getName() != null) {
+            this.name = dto.getName();
+        }
+        if (dto.getType() != null) {
+            this.type = dto.getType();
+        }
+        this.dimensions = dto.getDimensions();
+        this.substrate = dto.getSubstrate();
+        this.heating = dto.getHeating();
+        this.lighting = dto.getLighting();
+        this.humidity = dto.getHumidity();
+        this.temperature = dto.getTemperature();
+        this.notes = dto.getNotes();
     }
 }
