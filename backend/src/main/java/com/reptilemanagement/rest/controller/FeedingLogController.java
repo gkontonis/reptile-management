@@ -1,6 +1,6 @@
 package com.reptilemanagement.rest.controller;
 
-import com.reptilemanagement.dto.FeedingLogDto;
+import com.reptilemanagement.persistence.dto.FeedingLogDto;
 import com.reptilemanagement.rest.service.FeedingLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

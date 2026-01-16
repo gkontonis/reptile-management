@@ -1,6 +1,6 @@
 package com.reptilemanagement.security;
 
-import com.reptilemanagement.rest.repository.UserRepository;
+import com.reptilemanagement.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

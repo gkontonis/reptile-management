@@ -1,9 +1,9 @@
 package com.reptilemanagement.rest.service;
 
-import com.reptilemanagement.domain.WeightLog;
-import com.reptilemanagement.dto.WeightLogDto;
-import com.reptilemanagement.mapper.WeightLogMapper;
-import com.reptilemanagement.rest.repository.WeightLogRepository;
+import com.reptilemanagement.persistence.domain.WeightLog;
+import com.reptilemanagement.persistence.dto.WeightLogDto;
+import com.reptilemanagement.persistence.mapper.WeightLogMapper;
+import com.reptilemanagement.persistence.repository.WeightLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

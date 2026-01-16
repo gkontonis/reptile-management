@@ -1,8 +1,8 @@
 package com.reptilemanagement.rest.controller;
 
-import com.reptilemanagement.domain.Reptile;
-import com.reptilemanagement.dto.ReptileDto;
-import com.reptilemanagement.dto.ReptileImageDto;
+import com.reptilemanagement.persistence.domain.Reptile;
+import com.reptilemanagement.persistence.dto.ReptileDto;
+import com.reptilemanagement.persistence.dto.ReptileImageDto;
 import com.reptilemanagement.rest.service.ReptileImageService;
 import com.reptilemanagement.rest.service.ReptileService;
 import lombok.RequiredArgsConstructor;

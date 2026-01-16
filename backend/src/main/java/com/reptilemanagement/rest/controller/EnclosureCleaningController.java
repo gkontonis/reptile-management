@@ -1,7 +1,7 @@
 package com.reptilemanagement.rest.controller;
 
-import com.reptilemanagement.domain.EnclosureCleaning;
-import com.reptilemanagement.dto.EnclosureCleaningDto;
+import com.reptilemanagement.persistence.domain.EnclosureCleaning;
+import com.reptilemanagement.persistence.dto.EnclosureCleaningDto;
 import com.reptilemanagement.rest.service.EnclosureCleaningService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

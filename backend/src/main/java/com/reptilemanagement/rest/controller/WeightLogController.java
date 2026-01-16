@@ -1,6 +1,6 @@
 package com.reptilemanagement.rest.controller;
 
-import com.reptilemanagement.dto.WeightLogDto;
+import com.reptilemanagement.persistence.dto.WeightLogDto;
 import com.reptilemanagement.rest.service.WeightLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

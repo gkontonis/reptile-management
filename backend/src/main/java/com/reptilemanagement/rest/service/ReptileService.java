@@ -1,11 +1,11 @@
 package com.reptilemanagement.rest.service;
 
-import com.reptilemanagement.domain.Reptile;
-import com.reptilemanagement.domain.ReptileImage;
-import com.reptilemanagement.dto.ReptileDto;
-import com.reptilemanagement.mapper.ReptileMapper;
-import com.reptilemanagement.rest.repository.ReptileImageRepository;
-import com.reptilemanagement.rest.repository.ReptileRepository;
+import com.reptilemanagement.persistence.domain.Reptile;
+import com.reptilemanagement.persistence.domain.ReptileImage;
+import com.reptilemanagement.persistence.dto.ReptileDto;
+import com.reptilemanagement.persistence.mapper.ReptileMapper;
+import com.reptilemanagement.persistence.repository.ReptileImageRepository;
+import com.reptilemanagement.persistence.repository.ReptileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,9 +1,9 @@
 package com.reptilemanagement.rest.service;
 
-import com.reptilemanagement.domain.SheddingLog;
-import com.reptilemanagement.dto.SheddingLogDto;
-import com.reptilemanagement.mapper.SheddingLogMapper;
-import com.reptilemanagement.rest.repository.SheddingLogRepository;
+import com.reptilemanagement.persistence.domain.SheddingLog;
+import com.reptilemanagement.persistence.dto.SheddingLogDto;
+import com.reptilemanagement.persistence.mapper.SheddingLogMapper;
+import com.reptilemanagement.persistence.repository.SheddingLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

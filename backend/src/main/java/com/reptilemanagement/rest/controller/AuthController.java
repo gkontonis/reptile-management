@@ -1,7 +1,7 @@
 package com.reptilemanagement.rest.controller;
 
-import com.reptilemanagement.dto.AuthRequestDto;
-import com.reptilemanagement.dto.AuthResponseDto;
+import com.reptilemanagement.persistence.dto.AuthRequestDto;
+import com.reptilemanagement.persistence.dto.AuthResponseDto;
 import com.reptilemanagement.security.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

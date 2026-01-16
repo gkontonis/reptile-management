@@ -1,7 +1,7 @@
 package com.reptilemanagement.security;
 
-import com.reptilemanagement.domain.User;
-import com.reptilemanagement.rest.repository.UserRepository;
+import com.reptilemanagement.persistence.domain.User;
+import com.reptilemanagement.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

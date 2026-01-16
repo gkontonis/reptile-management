@@ -1,6 +1,6 @@
 package com.reptilemanagement.rest.controller;
 
-import com.reptilemanagement.dto.SheddingLogDto;
+import com.reptilemanagement.persistence.dto.SheddingLogDto;
 import com.reptilemanagement.rest.service.SheddingLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,9 +1,9 @@
 package com.reptilemanagement.rest.service;
 
-import com.reptilemanagement.domain.EnclosureCleaning;
-import com.reptilemanagement.dto.EnclosureCleaningDto;
-import com.reptilemanagement.mapper.EnclosureCleaningMapper;
-import com.reptilemanagement.rest.repository.EnclosureCleaningRepository;
+import com.reptilemanagement.persistence.domain.EnclosureCleaning;
+import com.reptilemanagement.persistence.dto.EnclosureCleaningDto;
+import com.reptilemanagement.persistence.mapper.EnclosureCleaningMapper;
+import com.reptilemanagement.persistence.repository.EnclosureCleaningRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

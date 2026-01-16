@@ -1,10 +1,10 @@
 package com.reptilemanagement.rest.service;
 
-import com.reptilemanagement.domain.ReptileImage;
-import com.reptilemanagement.dto.ReptileImageDto;
-import com.reptilemanagement.mapper.ReptileImageMapper;
-import com.reptilemanagement.rest.repository.ReptileImageRepository;
-import com.reptilemanagement.rest.repository.ReptileRepository;
+import com.reptilemanagement.persistence.domain.ReptileImage;
+import com.reptilemanagement.persistence.dto.ReptileImageDto;
+import com.reptilemanagement.persistence.mapper.ReptileImageMapper;
+import com.reptilemanagement.persistence.repository.ReptileImageRepository;
+import com.reptilemanagement.persistence.repository.ReptileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -137,7 +137,7 @@ public class ReptileImageService {
     @Transactional(readOnly = true)
     public List<ReptileImageDto> getImagesByReptileId(Long reptileId) {
         log.debug("Retrieving images for reptile: {}", reptileId);
-        return reptileImageRepository.findByReptileIdOrderByUploadedAtDesc(reptileId).stream()
+        return reptileImageRepository.findByReptileIdOrderByUpdatedAtDesc(reptileId).stream()
                 .map(reptileImageMapper::toDto)
                 .collect(Collectors.toList());
     }

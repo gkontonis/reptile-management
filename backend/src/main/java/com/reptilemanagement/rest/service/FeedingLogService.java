@@ -1,9 +1,9 @@
 package com.reptilemanagement.rest.service;
 
-import com.reptilemanagement.domain.FeedingLog;
-import com.reptilemanagement.dto.FeedingLogDto;
-import com.reptilemanagement.mapper.FeedingLogMapper;
-import com.reptilemanagement.rest.repository.FeedingLogRepository;
+import com.reptilemanagement.persistence.domain.FeedingLog;
+import com.reptilemanagement.persistence.dto.FeedingLogDto;
+import com.reptilemanagement.persistence.mapper.FeedingLogMapper;
+import com.reptilemanagement.persistence.repository.FeedingLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

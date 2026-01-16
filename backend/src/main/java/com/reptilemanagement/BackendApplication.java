@@ -1,7 +1,7 @@
 package com.reptilemanagement;
 
-import com.reptilemanagement.domain.User;
-import com.reptilemanagement.rest.repository.UserRepository;
+import com.reptilemanagement.persistence.domain.User;
+import com.reptilemanagement.persistence.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

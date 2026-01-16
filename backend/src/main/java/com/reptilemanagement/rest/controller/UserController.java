@@ -1,11 +1,11 @@
 package com.reptilemanagement.rest.controller;
 
-import com.reptilemanagement.dto.CreateUserRequest;
-import com.reptilemanagement.dto.UpdateUserRequest;
-import com.reptilemanagement.dto.UserDetailDto;
-import com.reptilemanagement.dto.UserDto;
-import com.reptilemanagement.domain.User;
-import com.reptilemanagement.rest.repository.UserRepository;
+import com.reptilemanagement.persistence.dto.CreateUserRequest;
+import com.reptilemanagement.persistence.dto.UpdateUserRequest;
+import com.reptilemanagement.persistence.dto.UserDetailDto;
+import com.reptilemanagement.persistence.dto.UserDto;
+import com.reptilemanagement.persistence.domain.User;
+import com.reptilemanagement.persistence.repository.UserRepository;
 import com.reptilemanagement.rest.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
