@@ -1,0 +1,21 @@
+/* Reptile List Component Styles */
+
+/* Ensure figure maintains aspect ratio and doesn't distort */
+figure {
+  position: relative;
+}
+
+/* Image loading and transitions */
+figure img {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Hover effect for card images */
+.card:hover figure img {
+  transform: scale(1.05);
+}
+
+/* Placeholder gradient styling */
+.bg-gradient-to-br {
+  background: linear-gradient(135deg, hsl(var(--b2)) 0%, hsl(var(--b3)) 100%);
+}

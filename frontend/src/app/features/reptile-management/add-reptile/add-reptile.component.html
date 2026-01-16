@@ -1,0 +1,176 @@
+<div class="container mx-auto p-6 max-w-2xl">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h1 class="card-title text-2xl mb-6">Add New Reptile</h1>
+
+      @if (error()) {
+        <div class="alert alert-error mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="reptileForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Basic Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Name *</span>
+            </label>
+            <input
+              type="text"
+              formControlName="name"
+              class="input input-bordered"
+              placeholder="Enter reptile name"
+              [class.input-error]="getFieldError('name')"
+            />
+            @if (getFieldError('name')) {
+              <label class="label">
+                <span class="label-text-alt text-error">{{ getFieldError('name') }}</span>
+              </label>
+            }
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Species *</span>
+            </label>
+            <input
+              type="text"
+              formControlName="species"
+              class="input input-bordered"
+              placeholder="e.g., Ball Python, Bearded Dragon"
+              [class.input-error]="getFieldError('species')"
+            />
+            @if (getFieldError('species')) {
+              <label class="label">
+                <span class="label-text-alt text-error">{{ getFieldError('species') }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Subspecies</span>
+          </label>
+          <input
+            type="text"
+            formControlName="subspecies"
+            class="input input-bordered"
+            placeholder="Optional subspecies or morph"
+            [class.input-error]="getFieldError('subspecies')"
+          />
+          @if (getFieldError('subspecies')) {
+            <label class="label">
+              <span class="label-text-alt text-error">{{ getFieldError('subspecies') }}</span>
+            </label>
+          }
+        </div>
+
+        <!-- Status and Gender -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Gender *</span>
+            </label>
+            <select formControlName="gender" class="select select-bordered">
+              @for (option of genderOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Status *</span>
+            </label>
+            <select formControlName="status" class="select select-bordered">
+              @for (option of statusOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Acquisition Date *</span>
+            </label>
+            <input
+              type="date"
+              formControlName="acquisitionDate"
+              class="input input-bordered"
+              [class.input-error]="getFieldError('acquisitionDate')"
+            />
+            @if (getFieldError('acquisitionDate')) {
+              <label class="label">
+                <span class="label-text-alt text-error">{{ getFieldError('acquisitionDate') }}</span>
+              </label>
+            }
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Birth Date</span>
+            </label>
+            <input
+              type="date"
+              formControlName="birthDate"
+              class="input input-bordered"
+            />
+            <label class="label">
+              <span class="label-text-alt">Optional - leave blank if unknown</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Notes</span>
+          </label>
+          <textarea
+            formControlName="notes"
+            class="textarea textarea-bordered h-24"
+            placeholder="Any additional notes about this reptile..."
+            [class.textarea-error]="getFieldError('notes')"
+          ></textarea>
+          @if (getFieldError('notes')) {
+            <label class="label">
+              <span class="label-text-alt text-error">{{ getFieldError('notes') }}</span>
+            </label>
+          }
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions justify-end space-x-2">
+          <button
+            type="button"
+            class="btn btn-ghost"
+            (click)="onCancel()"
+            [disabled]="loading()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="loading() || reptileForm.invalid"
+          >
+            @if (loading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+              Adding...
+            } @else {
+              Add Reptile
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

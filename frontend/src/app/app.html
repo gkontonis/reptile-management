@@ -1,0 +1,14 @@
+<div class="min-h-screen bg-base-200">
+  <app-sidebar></app-sidebar>
+  <!-- Toggle button when sidebar is collapsed -->
+  <button (click)="sidebarService.collapsed.set(false)" class="btn btn-circle bg-primary text-primary-content fixed top-4 left-4 z-50 shadow-md" *ngIf="sidebarService.collapsed()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-current">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
+  <div class="transition-all duration-300"
+       [class.ml-64]="!sidebarService.collapsed()"
+       [class.ml-0]="sidebarService.collapsed()">
+    <router-outlet></router-outlet>
+  </div>
+</div>

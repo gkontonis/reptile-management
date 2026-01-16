@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@source "../../src/**/*.{html,ts}";
+
+@theme {
+  --transition-colors: color, background-color, border-color, text-decoration-color, fill, stroke;
+}
+
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark, night, forest, dracula, synthwave;
+  logs: true;
+}
+
+/* Smooth theme transitions */
+html {
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

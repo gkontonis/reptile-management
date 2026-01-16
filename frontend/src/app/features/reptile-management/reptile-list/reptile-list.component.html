@@ -1,0 +1,104 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Reptile Collection</h1>
+    <button class="btn btn-primary" routerLink="/reptiles/add">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      Add Reptile
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center h-64">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-error">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ error() }}</span>
+      <div>
+        <button class="btn btn-sm btn-ghost" (click)="loadReptiles()">Retry</button>
+      </div>
+    </div>
+  } @else if (reptiles().length === 0) {
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body text-center py-16">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3.5A2.5 2.5 0 1110.5 16v-1.5a1 1 0 10-2 0v1.5z" />
+        </svg>
+        <h2 class="text-2xl font-semibold mb-2">No Reptiles Yet</h2>
+        <p class="text-base-content/70 mb-6">Start building your exotic animal collection by adding your first reptile.</p>
+        <button class="btn btn-primary btn-lg" routerLink="/reptiles/add">
+          Add Your First Reptile
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (reptile of reptiles(); track reptile.id) {
+        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+          <!-- Highlight Image Section -->
+          <figure class="h-48 bg-base-200 overflow-hidden">
+            @if (getHighlightImageUrl(reptile); as imageUrl) {
+              <img
+                [src]="imageUrl"
+                [alt]="reptile.name"
+                class="w-full h-full object-cover"
+                (error)="$any($event.target).src = getPlaceholderImage()"
+              />
+            } @else {
+              <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-base-200 to-base-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-base-content/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3.5A2.5 2.5 0 1110.5 16v-1.5a1 1 0 10-2 0v1.5z" />
+                </svg>
+              </div>
+            }
+          </figure>
+
+          <div class="card-body">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="card-title text-lg">{{ reptile.name }}</h3>
+                <p class="text-sm text-base-content/70 italic">{{ reptile.species }}</p>
+                @if (reptile.subspecies) {
+                  <p class="text-xs text-base-content/60">{{ reptile.subspecies }}</p>
+                }
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span class="badge {{getStatusBadgeClass(reptile.status)}} badge-sm">
+                  {{ reptile.status }}
+                </span>
+                <span class="text-lg" [title]="reptile.gender">
+                  {{ getGenderIcon(reptile.gender) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-base-content/70">Acquired:</span>
+                <span>{{ reptile.acquisitionDate | date:'shortDate' }}</span>
+              </div>
+              @if (reptile.birthDate) {
+                <div class="flex justify-between">
+                  <span class="text-base-content/70">Born:</span>
+                  <span>{{ reptile.birthDate | date:'shortDate' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="card-actions justify-end mt-4">
+              <button class="btn btn-sm btn-outline" [routerLink]="['/reptiles', reptile.id]">View Details</button>
+              <button class="btn btn-sm btn-primary">Log Activity</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

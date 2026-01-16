@@ -1,0 +1,102 @@
+<div class="fixed left-0 top-0 h-full bg-primary text-primary-content flex flex-col transition-all duration-300 shadow-lg w-64 z-40"
+     [class.translate-x-0]="!collapsed()"
+     [class.-translate-x-full]="collapsed()">
+  <!-- Header -->
+  <div class="p-4 border-b border-primary-content/20 flex items-center justify-center relative">
+    <h2 class="text-lg font-semibold" [class.hidden]="collapsed()">Home Management</h2>
+  </div>
+
+  <!-- Toggle button positioned outside -->
+  <button (click)="toggleCollapsed()" class="absolute top-2 btn btn-circle bg-base-100 text-primary shadow-md z-50 transition-all duration-300" [style.left]="collapsed() ? '0rem' : '15rem'">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-current">
+      <!-- Left chevron (close/collapse) -->
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" [class.hidden]="collapsed()"/>
+      <!-- Right chevron (open/expand) -->
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" [class.hidden]="!collapsed()"/>
+    </svg>
+  </button>
+
+  <!-- Navigation -->
+  <nav class="flex-1 p-4">
+    <ul class="menu menu-lg">
+      <li>
+        <a routerLink="/dashboard" routerLinkActive="active" class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          <span [class.hidden]="collapsed()">Dashboard</span>
+        </a>
+      </li>
+      @for (item of navigationItems(); track item.route) {
+        <li>
+          <a [routerLink]="item.route" routerLinkActive="active" class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" [attr.viewBox]="item.icon.includes('M9 2a1 1 0 000 2') ? '0 0 20 20' : '0 0 20 20'" fill="currentColor">
+              <path [attr.d]="item.icon" />
+            </svg>
+            <span [class.hidden]="collapsed()">{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <!-- Bottom Section -->
+  <div class="p-4 border-t border-primary-content/20">
+    <!-- Theme Switcher -->
+    <div class="dropdown dropdown-top mb-4">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-sm w-full justify-start" [class.btn-circle]="collapsed()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-current">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+        </svg>
+        <span [class.hidden]="collapsed()">Theme</span>
+      </div>
+      <ul tabindex="0" class="menu dropdown-content bg-base-100 text-base-content rounded-box z-[1] w-64 p-2 shadow-2xl border border-base-300">
+        <li class="menu-title text-base-content opacity-70">
+          <span>Choose Theme</span>
+        </li>
+        @for (theme of themeService.availableThemes; track theme.value) {
+          <li>
+            <a
+              (click)="setTheme(theme.value)"
+              [class.active]="themeService.currentTheme() === theme.value"
+              class="flex items-center gap-3 transition-all duration-200 text-base-content hover:bg-base-200">
+              <span class="text-2xl">{{ theme.icon }}</span>
+              <div class="flex flex-col flex-1">
+                <span class="font-semibold">{{ theme.label }}</span>
+                <span class="text-xs opacity-60">{{ theme.description }}</span>
+              </div>
+              @if (themeService.currentTheme() === theme.value) {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- User Info and Logout -->
+    <div class="flex flex-col gap-2">
+      <div class="text-sm" [class.hidden]="collapsed()">
+        Welcome, {{ username() }}
+      </div>
+      <button class="btn btn-ghost btn-sm w-full justify-start" [class.btn-circle]="collapsed()" (click)="logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        <span [class.hidden]="collapsed()">Logout</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Collapsed Logout Button -->
+<div class="fixed bottom-4 z-50 transition-all duration-300"
+     [style.left]="collapsed() ? '1rem' : '-3rem'">
+  <button class="btn btn-circle bg-base-100 text-primary shadow-md" (click)="logout()" title="Logout">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+    </svg>
+  </button>
+</div>
