@@ -1,7 +1,10 @@
 package com.reptilemanagement.persistence.dto;
 
+import com.reptilemanagement.persistence.dto.base.BaseDto;
+import com.reptilemanagement.persistence.dto.base.Updatable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -11,9 +14,10 @@ import java.time.LocalDateTime;
  * Used for API communication to decouple the domain model from the API.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class SheddingLogDto {
+public class SheddingLogDto extends BaseDto<Long> implements Updatable<SheddingLogDto> {
     /** Unique identifier for the shedding log entry */
     private Long id;
 
@@ -32,9 +36,27 @@ public class SheddingLogDto {
     /** Additional notes about the shedding */
     private String notes;
 
-    /** Timestamp when the shedding log entry was created */
-    private LocalDateTime createdAt;
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-    /** Timestamp when the shedding log entry was last updated */
-    private LocalDateTime updatedAt;
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public void update(SheddingLogDto dto) {
+        if (dto == null) {
+            return;
+        }
+        this.reptileId = dto.getReptileId();
+        this.sheddingDate = dto.getSheddingDate();
+        this.shedQuality = dto.getShedQuality();
+        this.ateShed = dto.getAteShed();
+        this.notes = dto.getNotes();
+        this.setUpdatedBy(dto.getUpdatedBy());
+        this.setUpdatedAt(dto.getUpdatedAt());
+    }
 }

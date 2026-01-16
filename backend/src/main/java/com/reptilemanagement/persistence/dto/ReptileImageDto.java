@@ -1,19 +1,21 @@
 package com.reptilemanagement.persistence.dto;
 
+import com.reptilemanagement.persistence.dto.base.BaseDto;
+import com.reptilemanagement.persistence.dto.base.Updatable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 /**
  * Data Transfer Object for ReptileImage entity.
  * Excludes the binary image data for lightweight responses.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReptileImageDto {
+public class ReptileImageDto extends BaseDto<Long> implements Updatable<ReptileImageDto> {
     /** Unique identifier for the image */
     private Long id;
 
@@ -32,6 +34,27 @@ public class ReptileImageDto {
     /** Size of the image in bytes */
     private Long size;
 
-    /** Timestamp when the image was uploaded */
-    private LocalDateTime uploadedAt;
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public void update(ReptileImageDto dto) {
+        if (dto == null) {
+            return;
+        }
+        this.reptileId = dto.getReptileId();
+        this.filename = dto.getFilename();
+        this.contentType = dto.getContentType();
+        this.description = dto.getDescription();
+        this.size = dto.getSize();
+        this.setUpdatedBy(dto.getUpdatedBy());
+        this.setUpdatedAt(dto.getUpdatedAt());
+    }
 }

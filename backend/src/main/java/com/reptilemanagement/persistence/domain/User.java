@@ -41,6 +41,14 @@ public class User {
     @Column(name = "role")
     private Set<String> roles;
 
+    /** User who created this account */
+    @Column(name = "created_by", updatable = false)
+    private String createdBy;
+
+    /** User who last updated this account */
+    @Column(name = "updated_by")
+    private String updatedBy;
+
     /** Timestamp when the user account was created */
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -51,20 +59,31 @@ public class User {
 
     /**
      * JPA lifecycle callback executed before persisting the entity.
-     * Sets the creation timestamp to current time.
+     * Sets the creation timestamp and audit fields.
      */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        // For User entity, we don't use AuthenticationUtils since the user might not be authenticated during creation
+        if (createdBy == null) {
+            createdBy = "system";
+        }
+        if (updatedBy == null) {
+            updatedBy = createdBy;
+        }
     }
 
     /**
      * JPA lifecycle callback executed before updating the entity.
-     * Updates the modification timestamp to current time.
+     * Updates the modification timestamp and audit fields.
      */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        // Set updatedBy during update, defaulting to "system" if not set
+        if (updatedBy == null) {
+            updatedBy = "system";
+        }
     }
 }

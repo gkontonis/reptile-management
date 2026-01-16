@@ -1,7 +1,10 @@
 package com.reptilemanagement.persistence.dto;
 
+import com.reptilemanagement.persistence.dto.base.BaseDto;
+import com.reptilemanagement.persistence.dto.base.Updatable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -12,9 +15,10 @@ import java.time.LocalDateTime;
  * Used for API communication to decouple the domain model from the API.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeightLogDto {
+public class WeightLogDto extends BaseDto<Long> implements Updatable<WeightLogDto> {
     /** Unique identifier for the weight log entry */
     private Long id;
 
@@ -30,9 +34,26 @@ public class WeightLogDto {
     /** Additional notes about the weight measurement */
     private String notes;
 
-    /** Timestamp when the weight log entry was created */
-    private LocalDateTime createdAt;
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-    /** Timestamp when the weight log entry was last updated */
-    private LocalDateTime updatedAt;
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public void update(WeightLogDto dto) {
+        if (dto == null) {
+            return;
+        }
+        this.reptileId = dto.getReptileId();
+        this.measurementDate = dto.getMeasurementDate();
+        this.weightGrams = dto.getWeightGrams();
+        this.notes = dto.getNotes();
+        this.setUpdatedBy(dto.getUpdatedBy());
+        this.setUpdatedAt(dto.getUpdatedAt());
+    }
 }

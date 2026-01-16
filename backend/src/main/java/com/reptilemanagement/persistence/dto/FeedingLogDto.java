@@ -1,7 +1,10 @@
 package com.reptilemanagement.persistence.dto;
 
+import com.reptilemanagement.persistence.dto.base.BaseDto;
+import com.reptilemanagement.persistence.dto.base.Updatable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -11,9 +14,10 @@ import java.time.LocalDateTime;
  * Used for API communication to decouple the domain model from the API.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeedingLogDto {
+public class FeedingLogDto extends BaseDto<Long> implements Updatable<FeedingLogDto> {
     /** Unique identifier for the feeding log entry */
     private Long id;
 
@@ -35,9 +39,28 @@ public class FeedingLogDto {
     /** Additional notes about the feeding */
     private String notes;
 
-    /** Timestamp when the feeding log entry was created */
-    private LocalDateTime createdAt;
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-    /** Timestamp when the feeding log entry was last updated */
-    private LocalDateTime updatedAt;
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public void update(FeedingLogDto dto) {
+        if (dto == null) {
+            return;
+        }
+        this.reptileId = dto.getReptileId();
+        this.feedingDate = dto.getFeedingDate();
+        this.foodType = dto.getFoodType();
+        this.quantity = dto.getQuantity();
+        this.ate = dto.getAte();
+        this.notes = dto.getNotes();
+        this.setUpdatedBy(dto.getUpdatedBy());
+        this.setUpdatedAt(dto.getUpdatedAt());
+    }
 }
