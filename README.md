@@ -1,240 +1,186 @@
 # Reptile Management System
 
-A comprehensive web application for managing reptile care, tracking feeding schedules, weight logs, shedding cycles, and enclosure maintenance.
+A comprehensive web application designed to help reptile enthusiasts and professionals manage their reptile collections. Track feeding schedules, monitor health metrics, maintain enclosure records, and keep detailed care histories all in one place.
+
+## Screenshots
+
+### Dashboard Overview
+![Dashboard](docs/screenshots/dashboard.png)
+*Main dashboard showing your reptile collection at a glance*
+
+### Reptile Details
+![Reptile Details](docs/screenshots/reptile-detail.png)
+*Detailed view with feeding logs, weight tracking, and shedding history*
+
+### Weight Tracking
+![Weight Chart](docs/screenshots/weight-chart.png)
+*Visual weight monitoring over time*
+
+### Feeding Schedule
+![Feeding Logs](docs/screenshots/feeding-logs.png)
+*Track feeding schedules and dietary information*
 
 ## Features
 
-- 🦎 **Reptile Management**: Add, edit, and track your reptile collection
-- 📸 **Image Gallery**: Upload and manage photos of your reptiles
-- 🏠 **Enclosure Tracking**: Monitor and manage enclosure information
-- 🍖 **Feeding Logs**: Track feeding schedules and diet history
-- ⚖️ **Weight Monitoring**: Record and visualize weight changes over time
-- 🐍 **Shedding Logs**: Track shedding cycles and patterns
-- 🧹 **Cleaning Schedule**: Manage enclosure cleaning and maintenance
-- 👤 **User Management**: Multi-user support with role-based access control
-- 🔐 **Secure Authentication**: JWT-based authentication system
+**Reptile Collection Management**
+- Maintain detailed profiles for each reptile (species, morph, age, gender)
+- Upload and organize photos of your animals
+- Quick access to all important care information
 
-## Tech Stack
+**Health Monitoring**
+- Track weight changes over time with visual charts
+- Record shedding cycles and patterns
+- Monitor growth and development
 
-### Backend
-- Java 21
-- Spring Boot 4.0
-- Spring Security with JWT
-- PostgreSQL 17
-- Maven
-- MapStruct for DTO mapping
+**Care Tracking**
+- Log feeding schedules and diet history
+- Maintain enclosure cleaning records
+- Set reminders for routine maintenance
 
-### Frontend
-- Angular 21
-- TypeScript 5
-- Tailwind CSS & DaisyUI
-- RxJS
+**Multi-User Support**
+- Secure user authentication
+- Role-based access control
+- Share collections with team members or family
 
-### Infrastructure
-- Docker & Docker Compose
-- Nginx (for production)
+## Getting Started
 
-## Prerequisites
+### Prerequisites
 
-- Docker Desktop installed and running
-- Git
-- (Optional) Java 21 and Node.js 22 for local development
+- **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop)
+- **Git** - [Download here](https://git-scm.com/downloads)
 
-## Quick Start with Docker
+That's it! Docker handles all the technical dependencies automatically.
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd reptile-management
-   ```
+### Installation
 
-2. **Create environment file**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and update:
-   - `POSTGRES_PASSWORD`: Set a strong password
-   - `JWT_SECRET`: Generate a new secret (run: `openssl rand -base64 32`)
-
-3. **Start the application**
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8081/api
-   - Database: localhost:5432
-
-5. **Default credentials**
-   - Username: `admin`
-   - Password: `admin123`
-   
-   ⚠️ **Change the default password immediately after first login!**
-
-## Database Only (Development Mode)
-
-If you want to run only the PostgreSQL database in Docker and run backend/frontend locally:
-
+**Step 1: Get the Code**
 ```bash
-# Start only the database
-docker-compose up -d postgres
-
-# Backend (in backend/ directory)
-./mvnw spring-boot:run
-
-# Frontend (in frontend/ directory)
-pnpm install
-pnpm start
+git clone https://github.com/gkontonis/reptile-management.git
+cd reptile-management
 ```
 
-## Docker Desktop Management
+**Step 2: Configure Environment**
+```bash
+cp .env.example .env
+```
 
-### View Running Containers
-In Docker Desktop, you should see:
-- `reptile-management-db` - PostgreSQL database
-- `reptile-management-backend` - Spring Boot API
-- `reptile-management-frontend` - Angular application
+Open the `.env` file and set secure values:
+- `POSTGRES_PASSWORD` - Choose a strong database password
+- `JWT_SECRET` - Generate with: `openssl rand -base64 32`
 
-### Stop the Application
+**Step 3: Launch the Application**
+```bash
+docker-compose up -d
+```
+
+Docker will automatically download and configure everything needed. This may take a few minutes on first run.
+
+**Step 4: Access the Application**
+
+Open your browser and navigate to: **http://localhost:3000**
+
+**Default Login:**
+- Username: `admin`
+- Password: `Admin123!`
+
+⚠️ **Important:** Change the default password immediately after your first login.
+
+### Usage
+
+Once logged in, you can:
+1. Add reptiles to your collection from the main dashboard
+2. Click on any reptile to view detailed information
+3. Log feeding events, weight measurements, and shedding cycles
+4. View charts and track health trends over time
+5. Upload photos to create a visual record
+
+## Managing the Application
+
+### Stopping the Application
 ```bash
 docker-compose down
 ```
 
-### Stop and Remove Data
+### Restarting the Application
+```bash
+docker-compose down
+```
+
+```bash
+docker-compose up -d
+```
+
+### Viewing Logs
+```bash
+docker-compose logs -f
+```
+
+### Complete Reset (Remove All Data)
+⚠️ This will delete all reptile data, user accounts, and records:
 ```bash
 docker-compose down -v
 ```
 
-## Development
-
-### Backend Development
-```bash
-cd backend
-./mvnw clean install
-./mvnw spring-boot:run
-```
-
-### Frontend Development
-```bash
-cd frontend
-pnpm install
-pnpm start
-```
-Frontend will be available at http://localhost:4200 with hot-reload enabled.
-
-### Database Access
-```bash
-# Connect to PostgreSQL
-docker exec -it reptile-management-db psql -U postgres -d reptilemanagement
-```
-
-## API Documentation
-
-Once the backend is running, API endpoints are available at:
-- Base URL: `http://localhost:8081/api`
-
-### Main Endpoints
-- `POST /api/auth/login` - User authentication
-- `GET /api/reptiles` - List all reptiles
-- `POST /api/reptiles` - Create new reptile
-- `GET /api/reptiles/{id}` - Get reptile details
-- `POST /api/feeding-logs` - Add feeding log
-- `POST /api/weight-logs` - Add weight log
-- `POST /api/shedding-logs` - Add shedding log
-
-## Project Structure
-
-```
-reptile-management/
-├── backend/              # Spring Boot backend
-├── frontend/             # Angular frontend
-├── docker-compose.yml    # Docker orchestration
-├── .env.example         # Environment template
-└── README.md
-```
-
 ## Configuration
 
-### Database Configuration
-Database settings can be modified in `.env`:
+If the default ports (3000, 8081, 5434) are already in use on your system, you can change them in the `.env` file:
+
 ```env
-POSTGRES_DB=reptilemanagement
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_secure_password
-POSTGRES_PORT=5432
+FRONTEND_PORT=3001
+BACKEND_PORT=8082
+POSTGRES_PORT=5435
 ```
 
-### Backend Configuration
-Backend settings in `.env`:
-```env
-BACKEND_PORT=8081
-JWT_SECRET=your_jwt_secret_here
-JWT_EXPIRATION=86400000
-```
-
-### Frontend Configuration
-Frontend settings in `.env`:
-```env
-FRONTEND_PORT=3000
-```
+After changing ports, restart the application with `docker-compose up -d`.
 
 ## Troubleshooting
 
-### Port Already in Use
-If ports 5432, 8081, or 3000 are already in use, change them in `.env`:
-```env
-POSTGRES_PORT=5433
-BACKEND_PORT=8082
-FRONTEND_PORT=3001
-```
+**Application won't start**
+- Ensure Docker Desktop is running
+- Check that ports 3000, 8081, and 5434 are not in use
+- Try: `docker-compose down && docker-compose up -d`
 
-### Database Connection Issues
-1. Ensure Docker Desktop is running
-2. Check if the database container is healthy:
-   ```bash
-   docker-compose ps
-   ```
-3. View logs:
-   ```bash
-   docker-compose logs postgres
-   ```
+**Can't login**
+- Verify containers are running: `docker-compose ps`
+- Wait 30 seconds for services to fully start
+- Check logs: `docker-compose logs backend`
 
-### Backend Not Starting
-```bash
-# View backend logs
-docker-compose logs backend
+**Changes not appearing**
+- Hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)
+- Clear browser cache
+- Restart containers: `docker-compose restart`
 
-# Rebuild backend
-docker-compose up -d --build backend
-```
+**Need more help?**
+View detailed logs: `docker-compose logs -f`
 
-### Frontend Not Loading
-```bash
-# View frontend logs
-docker-compose logs frontend
+## Technology Stack
 
-# Rebuild frontend
-docker-compose up -d --build frontend
-```
+Built with modern, reliable technologies:
 
-## Security Notes
+- **Frontend:** Angular 21, TypeScript, Tailwind CSS
+- **Backend:** Java 21, Spring Boot 4.0, Spring Security
+- **Database:** PostgreSQL 17
+- **Deployment:** Docker, Docker Compose, Nginx
 
-- Always change default passwords in production
-- Generate a strong JWT secret: `openssl rand -base64 64`
-- Never commit `.env` files to version control
-- Use HTTPS in production
-- Regularly update dependencies
+## For Developers
+
+Detailed development documentation is available in [DEVELOPMENT.md](DEVELOPMENT.md)
+
+Key resources:
+- API documentation at `http://localhost:8081/api`
+- Database access via Docker: `docker exec -it reptile-management-db psql -U postgres -d reptilemanagement`
 
 ## License
 
-[Your License]
+MIT License - feel free to use this project for your own reptile collection management needs.
 
 ## Contributing
 
-[Your contributing guidelines]
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Support
 
-[Your support information]
+If you encounter any issues or have questions:
+- Open an issue on GitHub
+- Check existing issues for solutions
+- Review the troubleshooting section above
