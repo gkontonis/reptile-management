@@ -35,6 +35,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Swagger/OpenAPI endpoints
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reptiles/*/images/*")
                         .permitAll()
                         .anyRequest().authenticated())
