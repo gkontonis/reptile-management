@@ -54,7 +54,7 @@ export class LoginComponent {
 
     this.authService.login(sanitizedCredentials).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/reptiles']);
       },
       error: (error) => {
         this.loading.set(false);

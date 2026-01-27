@@ -113,6 +113,10 @@ docker-compose up -d
 ### Rebuild Frontend
 ```bash
   docker-compose build frontend && docker-compose up -d frontend
+
+  or
+
+   docker-compose up -d --build frontend
 ```
 
 

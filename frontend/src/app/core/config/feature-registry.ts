@@ -11,19 +11,6 @@ export interface NavigationItem {
   feature?: string;
 }
 
-export interface DashboardWidget {
-  title: string;
-  value: number;
-  icon: string;
-  route?: string;
-  feature?: string;
-}
-
-export interface DashboardWidgetProvider {
-  getWidgets(userId: number): Promise<DashboardWidget[]>;
-  loadData?(userId: number): Promise<void>;
-}
-
 export interface FeatureConfig {
   name: string;
   enabled: boolean;
@@ -103,14 +90,6 @@ export const FEATURE_CONFIGS: FeatureConfig[] = [
         path: 'reptiles/:id',
         loadComponent: () => import('../../features/reptile-management/reptile-detail/reptile-detail.component').then(m => m.ReptileDetailComponent),
         canActivate: [authGuard]
-      }
-    ],
-    navigation: [
-      {
-        label: 'Reptiles',
-        route: '/reptiles',
-        icon: 'M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3.5A2.5 2.5 0 1110.5 16v-1.5a1 1 0 10-2 0v1.5z',
-        feature: 'reptile-management'
       }
     ]
   }
