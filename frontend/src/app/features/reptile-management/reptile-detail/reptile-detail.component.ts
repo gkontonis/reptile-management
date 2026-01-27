@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ReptileDetail, ReptileImage } from '../models/reptile.model';
+import { ReptileDetail, ReptileImage, FeedingLog } from '../models/reptile.model';
 import { ReptileService } from '../services/reptile.service';
 
 @Component({
@@ -21,6 +21,13 @@ export class ReptileDetailComponent implements OnInit {
   reptile = signal<ReptileDetail | null>(null);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
+
+  // Tab state
+  activeTab = signal<'overview' | 'feeding' | 'health'>('overview');
+
+  // Feeding logs
+  feedingLogs = signal<FeedingLog[]>([]);
+  feedingLogsLoading = signal<boolean>(false);
 
   // Modal states
   showDeleteModal = signal<boolean>(false);
@@ -70,7 +77,69 @@ export class ReptileDetailComponent implements OnInit {
     if (id) {
       this.loadReptile(+id);
       this.loadImages(+id);
+      this.loadFeedingLogs(+id);
     }
+  }
+
+  setActiveTab(tab: 'overview' | 'feeding' | 'health'): void {
+    this.activeTab.set(tab);
+  }
+
+  loadFeedingLogs(reptileId: number): void {
+    this.feedingLogsLoading.set(true);
+    this.reptileService.getFeedingLogs(reptileId).subscribe({
+      next: (logs) => {
+        // Sort by date descending (most recent first)
+        this.feedingLogs.set(logs.sort((a, b) =>
+          new Date(b.feedDate).getTime() - new Date(a.feedDate).getTime()
+        ));
+        this.feedingLogsLoading.set(false);
+      },
+      error: (err) => {
+        this.feedingLogsLoading.set(false);
+        console.error('Error loading feeding logs:', err);
+      }
+    });
+  }
+
+  getDaysAgo(dateString: string | undefined): string {
+    if (!dateString) return 'Never';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    return `${diffDays} days ago`;
+  }
+
+  getAge(birthDate: string | undefined): string {
+    if (!birthDate) return 'Unknown';
+    const birth = new Date(birthDate);
+    const now = new Date();
+
+    let years = now.getFullYear() - birth.getFullYear();
+    let months = now.getMonth() - birth.getMonth();
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    if (years === 0) {
+      return months === 1 ? '1 month' : `${months} months`;
+    }
+    if (months === 0) {
+      return years === 1 ? '1 year' : `${years} years`;
+    }
+    return `${years} year${years > 1 ? 's' : ''}, ${months} month${months > 1 ? 's' : ''}`;
+  }
+
+  getHighlightImageUrl(): string | null {
+    const reptile = this.reptile();
+    if (!reptile?.highlightImageId) return null;
+    return this.reptileService.getImageUrl(reptile.id, reptile.highlightImageId);
   }
 
   loadReptile(id: number): void {

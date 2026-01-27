@@ -110,6 +110,12 @@ docker-compose down
 docker-compose up -d
 ```
 
+### Rebuild Frontend
+```bash
+  docker-compose build frontend && docker-compose up -d frontend
+```
+
+
 ### Viewing Logs
 ```bash
 docker-compose logs -f
