@@ -1,176 +1,321 @@
-<div class="container mx-auto p-6 max-w-2xl">
-  <div class="card bg-base-100 shadow-xl">
-    <div class="card-body">
-      <h1 class="card-title text-2xl mb-6">Add New Reptile</h1>
-
-      @if (error()) {
-        <div class="alert alert-error mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{{ error() }}</span>
-        </div>
-      }
-
-      <form [formGroup]="reptileForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Basic Information -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Name *</span>
-            </label>
-            <input
-              type="text"
-              formControlName="name"
-              class="input input-bordered"
-              placeholder="Enter reptile name"
-              [class.input-error]="getFieldError('name')"
-            />
-            @if (getFieldError('name')) {
-              <label class="label">
-                <span class="label-text-alt text-error">{{ getFieldError('name') }}</span>
-              </label>
-            }
-          </div>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Species *</span>
-            </label>
-            <input
-              type="text"
-              formControlName="species"
-              class="input input-bordered"
-              placeholder="e.g., Ball Python, Bearded Dragon"
-              [class.input-error]="getFieldError('species')"
-            />
-            @if (getFieldError('species')) {
-              <label class="label">
-                <span class="label-text-alt text-error">{{ getFieldError('species') }}</span>
-              </label>
-            }
-          </div>
-        </div>
-
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Subspecies</span>
-          </label>
-          <input
-            type="text"
-            formControlName="subspecies"
-            class="input input-bordered"
-            placeholder="Optional subspecies or morph"
-            [class.input-error]="getFieldError('subspecies')"
-          />
-          @if (getFieldError('subspecies')) {
-            <label class="label">
-              <span class="label-text-alt text-error">{{ getFieldError('subspecies') }}</span>
-            </label>
-          }
-        </div>
-
-        <!-- Status and Gender -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Gender *</span>
-            </label>
-            <select formControlName="gender" class="select select-bordered">
-              @for (option of genderOptions; track option.value) {
-                <option [value]="option.value">{{ option.label }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Status *</span>
-            </label>
-            <select formControlName="status" class="select select-bordered">
-              @for (option of statusOptions; track option.value) {
-                <option [value]="option.value">{{ option.label }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <!-- Dates -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Acquisition Date *</span>
-            </label>
-            <input
-              type="date"
-              formControlName="acquisitionDate"
-              class="input input-bordered"
-              [class.input-error]="getFieldError('acquisitionDate')"
-            />
-            @if (getFieldError('acquisitionDate')) {
-              <label class="label">
-                <span class="label-text-alt text-error">{{ getFieldError('acquisitionDate') }}</span>
-              </label>
-            }
-          </div>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Birth Date</span>
-            </label>
-            <input
-              type="date"
-              formControlName="birthDate"
-              class="input input-bordered"
-            />
-            <label class="label">
-              <span class="label-text-alt">Optional - leave blank if unknown</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Notes -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Notes</span>
-          </label>
-          <textarea
-            formControlName="notes"
-            class="textarea textarea-bordered h-24"
-            placeholder="Any additional notes about this reptile..."
-            [class.textarea-error]="getFieldError('notes')"
-          ></textarea>
-          @if (getFieldError('notes')) {
-            <label class="label">
-              <span class="label-text-alt text-error">{{ getFieldError('notes') }}</span>
-            </label>
-          }
-        </div>
-
-        <!-- Actions -->
-        <div class="card-actions justify-end space-x-2">
-          <button
-            type="button"
-            class="btn btn-ghost"
-            (click)="onCancel()"
-            [disabled]="loading()"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="btn btn-primary"
-            [disabled]="loading() || reptileForm.invalid"
-          >
-            @if (loading()) {
-              <span class="loading loading-spinner loading-sm"></span>
-              Adding...
-            } @else {
-              Add Reptile
-            }
-          </button>
-        </div>
-      </form>
+<div class="min-h-screen p-4 lg:p-6">
+  <div class="max-w-4xl mx-auto">
+    <!-- Breadcrumbs -->
+    <div class="flex flex-wrap gap-2 mb-6 items-center text-sm">
+      <a class="text-base-content/60 hover:text-primary cursor-pointer" routerLink="/reptiles">Animals</a>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+      <span class="font-medium">Add New Animal</span>
     </div>
+
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">Add New Animal</h1>
+      <p class="text-base-content/60 text-sm mt-1">Fill in the details to add a new reptile to your collection</p>
+    </div>
+
+    <!-- Error Alert -->
+    @if (error()) {
+      <div class="alert alert-error mb-6 shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>{{ error() }}</span>
+        <button class="btn btn-sm btn-ghost" (click)="error.set(null)">Dismiss</button>
+      </div>
+    }
+
+    <form [formGroup]="reptileForm" (ngSubmit)="onSubmit()">
+      <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Main Form Column -->
+        <div class="flex-1 space-y-6">
+          <!-- Basic Information Card -->
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title text-base flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Basic Information
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <!-- Name -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Name <span class="text-error">*</span></span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="name"
+                    class="input input-bordered"
+                    placeholder="e.g., Monty"
+                    [class.input-error]="getFieldError('name')"
+                  />
+                  @if (getFieldError('name')) {
+                    <label class="label">
+                      <span class="label-text-alt text-error">{{ getFieldError('name') }}</span>
+                    </label>
+                  }
+                </div>
+
+                <!-- Species -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Species <span class="text-error">*</span></span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="species"
+                    class="input input-bordered"
+                    placeholder="e.g., Ball Python"
+                    [class.input-error]="getFieldError('species')"
+                  />
+                  @if (getFieldError('species')) {
+                    <label class="label">
+                      <span class="label-text-alt text-error">{{ getFieldError('species') }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <!-- Subspecies -->
+              <div class="form-control mt-2">
+                <label class="label">
+                  <span class="label-text font-medium">Subspecies / Morph</span>
+                </label>
+                <input
+                  type="text"
+                  formControlName="subspecies"
+                  class="input input-bordered"
+                  placeholder="e.g., Pastel, Albino, etc."
+                  [class.input-error]="getFieldError('subspecies')"
+                />
+                @if (getFieldError('subspecies')) {
+                  <label class="label">
+                    <span class="label-text-alt text-error">{{ getFieldError('subspecies') }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Classification Card -->
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title text-base flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                Classification
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <!-- Gender -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Gender <span class="text-error">*</span></span>
+                  </label>
+                  <div class="flex gap-2">
+                    @for (option of genderOptions; track option.value) {
+                      <label class="flex-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          formControlName="gender"
+                          [value]="option.value"
+                          class="hidden peer"
+                        />
+                        <div class="p-3 text-center rounded-lg border-2 border-base-300 peer-checked:border-primary peer-checked:bg-primary/10 transition-all hover:border-primary/50">
+                          <span class="text-lg block mb-1">
+                            @switch (option.value) {
+                              @case ('MALE') { ♂ }
+                              @case ('FEMALE') { ♀ }
+                              @default { ? }
+                            }
+                          </span>
+                          <span class="text-sm font-medium">{{ option.label }}</span>
+                        </div>
+                      </label>
+                    }
+                  </div>
+                </div>
+
+                <!-- Status -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Status <span class="text-error">*</span></span>
+                  </label>
+                  <select formControlName="status" class="select select-bordered w-full">
+                    @for (option of statusOptions; track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dates Card -->
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title text-base flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Important Dates
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <!-- Acquisition Date -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Acquisition Date <span class="text-error">*</span></span>
+                  </label>
+                  <input
+                    type="date"
+                    formControlName="acquisitionDate"
+                    class="input input-bordered"
+                    [class.input-error]="getFieldError('acquisitionDate')"
+                  />
+                  @if (getFieldError('acquisitionDate')) {
+                    <label class="label">
+                      <span class="label-text-alt text-error">{{ getFieldError('acquisitionDate') }}</span>
+                    </label>
+                  } @else {
+                    <label class="label">
+                      <span class="label-text-alt text-base-content/50">When did you acquire this animal?</span>
+                    </label>
+                  }
+                </div>
+
+                <!-- Birth Date -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Birth Date</span>
+                  </label>
+                  <input
+                    type="date"
+                    formControlName="birthDate"
+                    class="input input-bordered"
+                  />
+                  <label class="label">
+                    <span class="label-text-alt text-base-content/50">Leave blank if unknown</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes Card -->
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title text-base flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Additional Notes
+              </h2>
+
+              <div class="form-control mt-4">
+                <textarea
+                  formControlName="notes"
+                  class="textarea textarea-bordered h-32 resize-none"
+                  placeholder="Any additional information about this animal... (feeding preferences, behavior notes, health history, etc.)"
+                  [class.textarea-error]="getFieldError('notes')"
+                ></textarea>
+                @if (getFieldError('notes')) {
+                  <label class="label">
+                    <span class="label-text-alt text-error">{{ getFieldError('notes') }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Column -->
+        <aside class="w-full lg:w-72 space-y-6">
+          <!-- Quick Tips Card -->
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h3 class="card-title text-base flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Quick Tips
+              </h3>
+
+              <ul class="mt-4 space-y-3 text-sm">
+                <li class="flex items-start gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-base-content/70">Use clear, memorable names</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-base-content/70">Be specific with species names</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-base-content/70">Include morph details if known</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-base-content/70">Add photos after creating</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Actions Card -->
+          <div class="card bg-base-100 shadow-xl sticky top-6">
+            <div class="card-body">
+              <h3 class="card-title text-base">Actions</h3>
+
+              <div class="space-y-3 mt-4">
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-block"
+                  [disabled]="loading() || reptileForm.invalid"
+                >
+                  @if (loading()) {
+                    <span class="loading loading-spinner loading-sm"></span>
+                    Adding Animal...
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Animal
+                  }
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-block"
+                  (click)="onCancel()"
+                  [disabled]="loading()"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <div class="divider my-2"></div>
+
+              <p class="text-xs text-base-content/50 text-center">
+                <span class="text-error">*</span> Required fields
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </form>
   </div>
 </div>

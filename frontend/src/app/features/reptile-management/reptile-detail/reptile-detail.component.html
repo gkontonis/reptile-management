@@ -543,169 +543,272 @@
   <!-- Edit Modal -->
   @if (showEditModal()) {
     <div class="modal modal-open">
-      <div class="modal-box max-w-3xl max-h-[90vh] overflow-y-auto">
-        <h3 class="font-bold text-lg mb-4">Edit Reptile</h3>
-
-        <form [formGroup]="editForm" (ngSubmit)="onSubmitEdit()" class="space-y-4">
-          <!-- Basic Information -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Name *</span>
-              </label>
-              <input type="text" formControlName="name" class="input input-bordered input-sm"
-                placeholder="Enter reptile name" [class.input-error]="getFieldError('name')" />
-              @if (getFieldError('name')) {
-                <label class="label">
-                  <span class="label-text-alt text-error">{{ getFieldError('name') }}</span>
-                </label>
-              }
+      <div class="modal-box max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+        <!-- Modal Header -->
+        <div class="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="bg-primary/10 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg">Edit Animal Profile</h3>
+                <p class="text-sm text-base-content/60">Update details for {{ reptile()?.name }}</p>
+              </div>
             </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Species *</span>
-              </label>
-              <input type="text" formControlName="species" class="input input-bordered input-sm"
-                placeholder="e.g., Ball Python, Bearded Dragon" [class.input-error]="getFieldError('species')" />
-              @if (getFieldError('species')) {
-                <label class="label">
-                  <span class="label-text-alt text-error">{{ getFieldError('species') }}</span>
-                </label>
-              }
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Subspecies</span>
-              </label>
-              <input type="text" formControlName="subspecies" class="input input-bordered input-sm"
-                placeholder="Optional subspecies" />
-            </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Morph</span>
-              </label>
-              <input type="text" formControlName="morph" class="input input-bordered input-sm"
-                placeholder="Optional morph" />
-            </div>
-          </div>
-
-          <!-- Status and Gender -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Gender *</span>
-              </label>
-              <select formControlName="gender" class="select select-bordered select-sm">
-                @for (option of genderOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Status *</span>
-              </label>
-              <select formControlName="status" class="select select-bordered select-sm">
-                @for (option of statusOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </div>
-          </div>
-
-          <!-- Breeder and Purchase Info -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Breeder</span>
-              </label>
-              <input type="text" formControlName="breeder" class="input input-bordered input-sm"
-                placeholder="Optional breeder name" />
-            </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Purchase Price</span>
-              </label>
-              <input type="number" formControlName="purchasePrice" class="input input-bordered input-sm"
-                placeholder="0.00" min="0" step="0.01" [class.input-error]="getFieldError('purchasePrice')" />
-              @if (getFieldError('purchasePrice')) {
-                <label class="label">
-                  <span class="label-text-alt text-error">{{ getFieldError('purchasePrice') }}</span>
-                </label>
-              }
-            </div>
-          </div>
-
-          <!-- Dates -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Acquisition Date *</span>
-              </label>
-              <input type="date" formControlName="acquisitionDate" class="input input-bordered input-sm"
-                [class.input-error]="getFieldError('acquisitionDate')" />
-              @if (getFieldError('acquisitionDate')) {
-                <label class="label">
-                  <span class="label-text-alt text-error">{{ getFieldError('acquisitionDate') }}</span>
-                </label>
-              }
-            </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Birth Date</span>
-              </label>
-              <input type="date" formControlName="birthDate" class="input input-bordered input-sm" />
-              <label class="label">
-                <span class="label-text-alt">Optional - leave blank if unknown</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Enclosure ID -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Enclosure ID</span>
-            </label>
-            <input type="number" formControlName="enclosureId" class="input input-bordered input-sm"
-              placeholder="Optional enclosure assignment" />
-          </div>
-
-          <!-- Notes -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Notes</span>
-            </label>
-            <textarea formControlName="notes" class="textarea textarea-bordered h-20"
-              placeholder="Any additional notes about this reptile..."
-              [class.textarea-error]="getFieldError('notes')"></textarea>
-            @if (getFieldError('notes')) {
-              <label class="label">
-                <span class="label-text-alt text-error">{{ getFieldError('notes') }}</span>
-              </label>
-            }
-          </div>
-
-          <!-- Actions -->
-          <div class="modal-action">
-            <button type="button" class="btn btn-ghost" (click)="cancelEdit()" [disabled]="editLoading()">
-              Cancel
+            <button class="btn btn-ghost btn-sm btn-circle" (click)="cancelEdit()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
-            <button type="submit" class="btn btn-primary" [disabled]="editLoading() || editForm.invalid">
-              @if (editLoading()) {
-                <span class="loading loading-spinner loading-sm"></span>
-                Saving...
-              } @else {
-                Save Changes
-              }
-            </button>
+          </div>
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="onSubmitEdit()">
+          <div class="p-6 space-y-6">
+            <!-- Basic Information Section -->
+            <div class="rounded-xl border border-base-300 p-5">
+              <h4 class="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Basic Information
+              </h4>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Name <span class="text-error">*</span></span>
+                  </label>
+                  <input type="text" formControlName="name" class="input input-bordered"
+                    placeholder="Enter reptile name" [class.input-error]="getFieldError('name')" />
+                  @if (getFieldError('name')) {
+                    <label class="label">
+                      <span class="label-text-alt text-error">{{ getFieldError('name') }}</span>
+                    </label>
+                  }
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Species <span class="text-error">*</span></span>
+                  </label>
+                  <input type="text" formControlName="species" class="input input-bordered"
+                    placeholder="e.g., Ball Python" [class.input-error]="getFieldError('species')" />
+                  @if (getFieldError('species')) {
+                    <label class="label">
+                      <span class="label-text-alt text-error">{{ getFieldError('species') }}</span>
+                    </label>
+                  }
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Subspecies</span>
+                  </label>
+                  <input type="text" formControlName="subspecies" class="input input-bordered"
+                    placeholder="Optional subspecies" />
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Morph</span>
+                  </label>
+                  <input type="text" formControlName="morph" class="input input-bordered"
+                    placeholder="e.g., Pastel, Albino" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Classification Section -->
+            <div class="rounded-xl border border-base-300 p-5">
+              <h4 class="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                Classification
+              </h4>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Gender Selection -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Gender <span class="text-error">*</span></span>
+                  </label>
+                  <div class="flex gap-2">
+                    @for (option of genderOptions; track option.value) {
+                      <label class="flex-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          formControlName="gender"
+                          [value]="option.value"
+                          class="hidden peer"
+                        />
+                        <div class="p-3 text-center rounded-lg border-2 border-base-300 peer-checked:border-primary peer-checked:bg-primary/10 transition-all hover:border-primary/50">
+                          <span class="text-lg block mb-1">
+                            @switch (option.value) {
+                              @case ('MALE') { ♂ }
+                              @case ('FEMALE') { ♀ }
+                              @default { ? }
+                            }
+                          </span>
+                          <span class="text-sm font-medium">{{ option.label }}</span>
+                        </div>
+                      </label>
+                    }
+                  </div>
+                </div>
+
+                <!-- Status Selection -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Status <span class="text-error">*</span></span>
+                  </label>
+                  <select formControlName="status" class="select select-bordered w-full">
+                    @for (option of statusOptions; track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acquisition Details Section -->
+            <div class="rounded-xl border border-base-300 p-5">
+              <h4 class="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Acquisition Details
+              </h4>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Breeder</span>
+                  </label>
+                  <input type="text" formControlName="breeder" class="input input-bordered"
+                    placeholder="Breeder name" />
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Purchase Price</span>
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50">$</span>
+                    <input type="number" formControlName="purchasePrice" class="input input-bordered w-full pl-7"
+                      placeholder="0.00" min="0" step="0.01" [class.input-error]="getFieldError('purchasePrice')" />
+                  </div>
+                  @if (getFieldError('purchasePrice')) {
+                    <label class="label">
+                      <span class="label-text-alt text-error">{{ getFieldError('purchasePrice') }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Dates Section -->
+            <div class="rounded-xl border border-base-300 p-5">
+              <h4 class="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Important Dates
+              </h4>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Acquisition Date <span class="text-error">*</span></span>
+                  </label>
+                  <input type="date" formControlName="acquisitionDate" class="input input-bordered"
+                    [class.input-error]="getFieldError('acquisitionDate')" />
+                  @if (getFieldError('acquisitionDate')) {
+                    <label class="label">
+                      <span class="label-text-alt text-error">{{ getFieldError('acquisitionDate') }}</span>
+                    </label>
+                  }
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Birth Date</span>
+                  </label>
+                  <input type="date" formControlName="birthDate" class="input input-bordered" />
+                  <label class="label">
+                    <span class="label-text-alt text-base-content/50">Leave blank if unknown</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Housing Section -->
+            <div class="rounded-xl border border-base-300 p-5">
+              <h4 class="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Housing
+              </h4>
+
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">Enclosure ID</span>
+                </label>
+                <input type="number" formControlName="enclosureId" class="input input-bordered"
+                  placeholder="Optional enclosure assignment" />
+              </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="rounded-xl border border-base-300 p-5">
+              <h4 class="font-semibold text-sm uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Notes
+              </h4>
+
+              <div class="form-control">
+                <textarea formControlName="notes" class="textarea textarea-bordered h-28 resize-none"
+                  placeholder="Any additional notes about this reptile..."
+                  [class.textarea-error]="getFieldError('notes')"></textarea>
+                @if (getFieldError('notes')) {
+                  <label class="label">
+                    <span class="label-text-alt text-error">{{ getFieldError('notes') }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="sticky bottom-0 bg-base-100 border-t border-base-300 px-6 py-4">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-base-content/50">
+                <span class="text-error">*</span> Required fields
+              </p>
+              <div class="flex gap-3">
+                <button type="button" class="btn btn-ghost" (click)="cancelEdit()" [disabled]="editLoading()">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="editLoading() || editForm.invalid">
+                  @if (editLoading()) {
+                    <span class="loading loading-spinner loading-sm"></span>
+                    Saving...
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Save Changes
+                  }
+                </button>
+              </div>
+            </div>
           </div>
         </form>
       </div>

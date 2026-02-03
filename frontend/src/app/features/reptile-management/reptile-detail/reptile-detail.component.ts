@@ -264,8 +264,10 @@ export class ReptileDetailComponent implements OnInit {
         next: (updatedReptile) => {
           this.editLoading.set(false);
           this.showEditModal.set(false);
-          // Reload the reptile details
+          // Reload all reptile data
           this.loadReptile(reptile.id);
+          this.loadImages(reptile.id);
+          this.loadFeedingLogs(reptile.id);
         },
         error: (err) => {
           this.editLoading.set(false);

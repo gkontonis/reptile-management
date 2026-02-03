@@ -1,14 +1,14 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ReptileService } from '../services/reptile.service';
 import { Reptile } from '../models/reptile.model';
 
 @Component({
   selector: 'app-add-reptile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './add-reptile.component.html',
   styleUrls: ['./add-reptile.component.css']
 })
