@@ -194,3 +194,25 @@ If you encounter any issues or have questions:
 - Open an issue on GitHub
 - Check existing issues for solutions
 - Review the troubleshooting section above
+
+## Built With
+
+-   [Spring Boot](https://spring.io/projects/spring-boot)
+-   [Spring Boot OpenAPI](https://springdoc.org/v2/)
+-   [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.7.4/maven-plugin/reference/html/)
+-   [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/2.7.4/reference/htmlsingle/#actuator)
+-   [Spring Boot Starter Validation](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation)
+-   [Spring Web](https://docs.spring.io/spring-boot/docs/2.7.4/reference/htmlsingle/#web)
+-   [Spring Data JPA](https://docs.spring.io/spring-boot/docs/2.7.4/reference/htmlsingle/#data.sql.jpa-and-spring-data)
+-   [Spring Security](https://docs.spring.io/spring-boot/docs/2.7.4/reference/htmlsingle/#web.security)
+-   [MapStruct](https://mapstruct.org/documentation/installation/)
+-   [PostgresSQL](https://mvnrepository.com/artifact/org.postgresql/postgresql)
+-   [Lombok](https://projectlombok.org/)
+
+<br/>
+
+<div align="center">
+  Built With ❤️
+</div>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
