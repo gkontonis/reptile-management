@@ -35,6 +35,16 @@ docker-compose up -d --build backend
 docker-compose down -v
 ```
 
+### Database Only (for local backend/frontend development)
+
+```bash
+# Start only the database
+docker-compose up -d db
+
+# View database logs
+docker-compose logs -f db
+```
+
 ### Frontend Development
 
 ```bash

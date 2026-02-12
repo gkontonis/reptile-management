@@ -1,5 +1,5 @@
 services:
-  postgres:
+  db:
     image: postgres:17-alpine
     container_name: reptile-management-db
     restart: unless-stopped
@@ -28,13 +28,13 @@ services:
     ports:
       - "${BACKEND_PORT:-8081}:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-reptilemanagement}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-reptilemanagement}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
     networks:
       - reptile-network
