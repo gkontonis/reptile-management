@@ -51,6 +51,18 @@ export interface SheddingLog {
   notes?: string;
 }
 
+export type PoopConsistency = 'NORMAL' | 'RUNNY' | 'HARD' | 'WATERY';
+
+export interface PoopLog {
+  id: number;
+  reptileId: number;
+  poopDate: string;
+  consistency: PoopConsistency;
+  color?: string;
+  parasitesPresent: boolean;
+  notes?: string;
+}
+
 export interface EnclosureCleaning {
   id: number;
   enclosureId: number;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Reptile, ReptileDetail, FeedingLog, WeightLog, SheddingLog, EnclosureCleaning, Enclosure, ReptileImage } from '../models/reptile.model';
+import { Reptile, ReptileDetail, FeedingLog, WeightLog, SheddingLog, PoopLog, EnclosureCleaning, Enclosure, ReptileImage } from '../models/reptile.model';
 
 @Injectable({
   providedIn: 'root'
@@ -57,6 +57,25 @@ export class ReptileService {
 
   addSheddingLog(reptileId: number, log: Omit<SheddingLog, 'id' | 'reptileId'>): Observable<SheddingLog> {
     return this.http.post<SheddingLog>(`${this.apiUrl}/${reptileId}/shedding`, log);
+  }
+
+  // Poop logs
+  private poopLogUrl = '/api/poop-logs';
+
+  getPoopLogs(reptileId: number): Observable<PoopLog[]> {
+    return this.http.get<PoopLog[]>(`${this.poopLogUrl}/reptile/${reptileId}`);
+  }
+
+  addPoopLog(log: Omit<PoopLog, 'id'>): Observable<PoopLog> {
+    return this.http.post<PoopLog>(this.poopLogUrl, log);
+  }
+
+  updatePoopLog(id: number, log: PoopLog): Observable<PoopLog> {
+    return this.http.put<PoopLog>(`${this.poopLogUrl}/${id}`, log);
+  }
+
+  deletePoopLog(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.poopLogUrl}/${id}`);
   }
 
   // Enclosure operations
