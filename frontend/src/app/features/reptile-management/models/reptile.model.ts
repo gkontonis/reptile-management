@@ -29,9 +29,10 @@ export interface ReptileDetail extends Reptile {
 export interface FeedingLog {
   id: number;
   reptileId: number;
-  feedDate: string;
+  feedingDate: string;
   foodType: string;
-  quantity: number;
+  quantity: string;
+  ate: boolean;
   notes?: string;
 }
 

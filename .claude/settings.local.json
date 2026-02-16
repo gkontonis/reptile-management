@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(docker logs:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(npx ng build:*)"
     ]
   }
 }

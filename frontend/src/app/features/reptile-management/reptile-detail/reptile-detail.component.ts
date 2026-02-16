@@ -32,8 +32,10 @@ export class ReptileDetailComponent implements OnInit {
   // Modal states
   showDeleteModal = signal<boolean>(false);
   showEditModal = signal<boolean>(false);
+  showFeedingModal = signal<boolean>(false);
   deleteLoading = signal<boolean>(false);
   editLoading = signal<boolean>(false);
+  feedingLoading = signal<boolean>(false);
 
   // Edit form
   editForm: FormGroup = this.fb.group({
@@ -50,6 +52,37 @@ export class ReptileDetailComponent implements OnInit {
     enclosureId: [null],
     notes: ['', Validators.maxLength(1000)]
   });
+
+  // Feeding form
+  feedingForm: FormGroup = this.fb.group({
+    feedingDate: ['', Validators.required],
+    foodType: ['', [Validators.required, Validators.maxLength(100)]],
+    quantity: ['', [Validators.required, Validators.maxLength(100)]],
+    ate: [true],
+    notes: ['', Validators.maxLength(500)]
+  });
+
+  foodTypeOptions = [
+    'Mouse - Pinky',
+    'Mouse - Fuzzy',
+    'Mouse - Hopper',
+    'Mouse - Adult',
+    'Rat - Pinky',
+    'Rat - Fuzzy',
+    'Rat - Pup',
+    'Rat - Weaned',
+    'Rat - Small',
+    'Rat - Medium',
+    'Rat - Large',
+    'Crickets',
+    'Dubia Roaches',
+    'Mealworms',
+    'Superworms',
+    'Hornworms',
+    'Waxworms',
+    'Vegetables',
+    'Fruit'
+  ];
 
   genderOptions = [
     { value: 'MALE', label: 'Male' },
@@ -89,11 +122,17 @@ export class ReptileDetailComponent implements OnInit {
     this.feedingLogsLoading.set(true);
     this.reptileService.getFeedingLogs(reptileId).subscribe({
       next: (logs) => {
-        // Sort by date descending (most recent first)
-        this.feedingLogs.set(logs.sort((a, b) =>
-          new Date(b.feedDate).getTime() - new Date(a.feedDate).getTime()
-        ));
+        const sorted = logs.sort((a, b) =>
+          new Date(b.feedingDate).getTime() - new Date(a.feedingDate).getTime()
+        );
+        this.feedingLogs.set(sorted);
         this.feedingLogsLoading.set(false);
+
+        // Update lastFedDate from most recent feeding log
+        const reptile = this.reptile();
+        if (reptile && sorted.length > 0) {
+          this.reptile.set({ ...reptile, lastFedDate: sorted[0].feedingDate });
+        }
       },
       error: (err) => {
         this.feedingLogsLoading.set(false);
@@ -305,6 +344,57 @@ export class ReptileDetailComponent implements OnInit {
       }
     }
     return null;
+  }
+
+  // Feeding log methods
+  openFeedingModal(): void {
+    const now = new Date();
+    const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    this.feedingForm.reset({ feedingDate: localIso, ate: true, foodType: '', quantity: '', notes: '' });
+    this.showFeedingModal.set(true);
+  }
+
+  cancelFeeding(): void {
+    this.showFeedingModal.set(false);
+    this.feedingForm.reset();
+  }
+
+  onSubmitFeeding(): void {
+    if (this.feedingForm.valid) {
+      const reptile = this.reptile();
+      if (!reptile) return;
+
+      this.feedingLoading.set(true);
+      const formValue = this.feedingForm.value;
+
+      const log = {
+        reptileId: reptile.id,
+        feedingDate: new Date(formValue.feedingDate).toISOString(),
+        foodType: formValue.foodType,
+        quantity: formValue.quantity,
+        ate: formValue.ate,
+        notes: formValue.notes || null
+      };
+
+      this.reptileService.addFeedingLog(log).subscribe({
+        next: () => {
+          this.feedingLoading.set(false);
+          this.showFeedingModal.set(false);
+          this.feedingForm.reset();
+          this.loadFeedingLogs(reptile.id);
+          this.loadReptile(reptile.id);
+        },
+        error: (err) => {
+          this.feedingLoading.set(false);
+          console.error('Error creating feeding log:', err);
+          this.error.set('Failed to create feeding log. Please try again.');
+        }
+      });
+    } else {
+      Object.keys(this.feedingForm.controls).forEach(key => {
+        this.feedingForm.get(key)?.markAsTouched();
+      });
+    }
   }
 
   // Image methods

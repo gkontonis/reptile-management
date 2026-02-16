@@ -1,8 +1,8 @@
 # Reptile Management System - Implementation TODO
 
-> **Last Updated:** January 16, 2026  
-> **Status:** In Progress  
-> **Total Tasks:** 25
+> **Last Updated:** February 16, 2026
+> **Status:** In Progress
+> **Total Tasks:** 20
 
 ---
 
@@ -16,91 +16,11 @@
 - [x] Image upload and management
 - [x] Basic feeding, weight, and shedding log entities
 - [x] Docker containerization setup
+- [x] Poop/defecation log (backend entity, DTO, repository, mapper, service, controller)
+- [x] Poop/defecation log frontend model and service methods
 
 ### 🎯 Current Implementation Focus
 The following features need to be implemented to complete the vision described in the README.
-
----
-
-## Phase 1: Complete Data Models (5 tasks)
-
-### 🔴 Task 1: Add Missing Log Models - Poop/Defecation Logs
-**Priority:** High  
-**Estimated Time:** 2 hours
-
-- [ ] Define requirements for poop/defecation tracking
-  - Date/time of defecation
-  - Consistency (normal, runny, hard, etc.)
-  - Color
-  - Presence of parasites or abnormalities
-  - Notes field
-
-**Files to modify:**
-- Backend: Create domain model structure
-
----
-
-### 🔴 Task 2: Implement Backend PoopLog Domain Entity and Repository
-**Priority:** High  
-**Estimated Time:** 1.5 hours
-
-- [ ] Create `PoopLog.java` entity in `backend/src/main/java/com/reptilemanagement/persistence/domain/`
-- [ ] Add fields: id, reptileId, poopDate, consistency, color, notes, etc.
-- [ ] Implement JPA annotations and relationships
-- [ ] Create `PoopLogRepository.java` interface
-- [ ] Add query methods (findByReptileId, findByDateRange)
-
-**Files to create:**
-- `backend/src/main/java/com/reptilemanagement/persistence/domain/PoopLog.java`
-- `backend/src/main/java/com/reptilemanagement/persistence/repository/PoopLogRepository.java`
-
----
-
-### 🔴 Task 3: Create PoopLog Service and Controller with CRUD Endpoints
-**Priority:** High  
-**Estimated Time:** 2 hours
-
-- [ ] Create `PoopLogDto.java` for data transfer
-- [ ] Create `PoopLogMapper.java` for entity/DTO conversion
-- [ ] Implement `PoopLogService.java` with CRUD operations
-- [ ] Create `PoopLogController.java` with REST endpoints:
-  - GET `/api/reptiles/{id}/poop` - Get all poop logs for a reptile
-  - POST `/api/reptiles/{id}/poop` - Add new poop log
-  - PUT `/api/poop/{id}` - Update poop log
-  - DELETE `/api/poop/{id}` - Delete poop log
-
-**Files to create:**
-- `backend/src/main/java/com/reptilemanagement/persistence/dto/PoopLogDto.java`
-- `backend/src/main/java/com/reptilemanagement/persistence/mapper/PoopLogMapper.java`
-- `backend/src/main/java/com/reptilemanagement/rest/service/PoopLogService.java`
-- `backend/src/main/java/com/reptilemanagement/rest/controller/PoopLogController.java`
-
----
-
-### 🔴 Task 4: Add PoopLog Model to Frontend TypeScript Models
-**Priority:** High  
-**Estimated Time:** 30 minutes
-
-- [ ] Add `PoopLog` interface to reptile model file
-- [ ] Define TypeScript types matching backend DTO
-- [ ] Add enums for consistency and color
-
-**Files to modify:**
-- `frontend/src/app/features/reptile-management/models/reptile.model.ts`
-
----
-
-### 🔴 Task 5: Update ReptileService with Poop Log API Calls
-**Priority:** High  
-**Estimated Time:** 1 hour
-
-- [ ] Add `getPoopLogs(reptileId)` method
-- [ ] Add `addPoopLog(reptileId, log)` method
-- [ ] Add `updatePoopLog(id, log)` method
-- [ ] Add `deletePoopLog(id)` method
-
-**Files to modify:**
-- `frontend/src/app/features/reptile-management/services/reptile.service.ts`
 
 ---
 
@@ -516,13 +436,13 @@ pnpm add chart.js ng2-charts date-fns
 ## 📈 Progress Tracking
 
 ### Completion Status by Phase
-- **Phase 1:** 0/5 tasks complete (0%)
+- **Phase 1:** 5/5 tasks complete (100%) - DONE
 - **Phase 2:** 0/4 tasks complete (0%)
 - **Phase 3:** 0/5 tasks complete (0%)
 - **Phase 4:** 0/6 tasks complete (0%)
 - **Phase 5:** 0/5 tasks complete (0%)
 
-**Overall Progress:** 0/25 tasks complete (0%)
+**Overall Progress:** 5/25 tasks complete (20%)
 
 ---
 

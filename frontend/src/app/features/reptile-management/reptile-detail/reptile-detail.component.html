@@ -285,7 +285,7 @@
             <div class="card-body">
               <div class="flex justify-between items-center">
                 <h3 class="card-title">Recent Feeding History</h3>
-                <button class="btn btn-primary btn-sm gap-1">
+                <button class="btn btn-primary btn-sm gap-1" (click)="openFeedingModal()">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
@@ -313,15 +313,23 @@
                         <th>Date</th>
                         <th>Food Type</th>
                         <th>Quantity</th>
+                        <th>Ate</th>
                         <th>Notes</th>
                       </tr>
                     </thead>
                     <tbody>
                       @for (log of feedingLogs().slice(0, 5); track log.id) {
                         <tr class="hover">
-                          <td class="text-sm">{{ log.feedDate | date:'mediumDate' }}</td>
+                          <td class="text-sm">{{ log.feedingDate | date:'mediumDate' }}</td>
                           <td class="text-sm font-medium">{{ log.foodType }}</td>
                           <td class="text-sm">{{ log.quantity }}</td>
+                          <td class="text-sm">
+                            @if (log.ate) {
+                              <span class="badge badge-success badge-sm">Yes</span>
+                            } @else {
+                              <span class="badge badge-error badge-sm">No</span>
+                            }
+                          </td>
                           <td class="text-sm text-base-content/60">{{ log.notes || '-' }}</td>
                         </tr>
                       }
@@ -346,7 +354,7 @@
             <div class="card-body">
               <div class="flex justify-between items-center">
                 <h3 class="card-title">Feeding History</h3>
-                <button class="btn btn-primary btn-sm gap-1">
+                <button class="btn btn-primary btn-sm gap-1" (click)="openFeedingModal()">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
@@ -374,15 +382,23 @@
                         <th>Date</th>
                         <th>Food Type</th>
                         <th>Quantity</th>
+                        <th>Ate</th>
                         <th>Notes</th>
                       </tr>
                     </thead>
                     <tbody>
                       @for (log of feedingLogs(); track log.id) {
                         <tr class="hover">
-                          <td class="text-sm">{{ log.feedDate | date:'mediumDate' }}</td>
+                          <td class="text-sm">{{ log.feedingDate | date:'mediumDate' }}</td>
                           <td class="text-sm font-medium">{{ log.foodType }}</td>
                           <td class="text-sm">{{ log.quantity }}</td>
+                          <td class="text-sm">
+                            @if (log.ate) {
+                              <span class="badge badge-success badge-sm">Yes</span>
+                            } @else {
+                              <span class="badge badge-error badge-sm">No</span>
+                            }
+                          </td>
                           <td class="text-sm text-base-content/60 max-w-xs truncate">{{ log.notes || '-' }}</td>
                         </tr>
                       }
@@ -882,6 +898,110 @@
       </div>
       <form method="dialog" class="modal-backdrop">
         <button (click)="cancelUpload()">close</button>
+      </form>
+    </div>
+  }
+
+  <!-- Feeding Log Modal -->
+  @if (showFeedingModal()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-lg">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="bg-primary/10 p-2 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg">Log Feeding</h3>
+              <p class="text-sm text-base-content/60">Record a feeding for {{ reptile()?.name }}</p>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm btn-circle" (click)="cancelFeeding()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form [formGroup]="feedingForm" (ngSubmit)="onSubmitFeeding()">
+          <div class="space-y-4">
+            <!-- Date/Time -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Date & Time <span class="text-error">*</span></span>
+              </label>
+              <input type="datetime-local" formControlName="feedingDate" class="input input-bordered w-full"
+                [class.input-error]="feedingForm.get('feedingDate')?.invalid && feedingForm.get('feedingDate')?.touched" />
+            </div>
+
+            <!-- Food Type -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Food Type <span class="text-error">*</span></span>
+              </label>
+              <input type="text" formControlName="foodType" class="input input-bordered w-full"
+                list="foodTypeList" placeholder="e.g., Mouse - Adult"
+                [class.input-error]="feedingForm.get('foodType')?.invalid && feedingForm.get('foodType')?.touched" />
+              <datalist id="foodTypeList">
+                @for (food of foodTypeOptions; track food) {
+                  <option [value]="food"></option>
+                }
+              </datalist>
+            </div>
+
+            <!-- Quantity -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Quantity <span class="text-error">*</span></span>
+              </label>
+              <input type="text" formControlName="quantity" class="input input-bordered w-full"
+                placeholder="e.g., 1, 2 crickets, 1 small mouse"
+                [class.input-error]="feedingForm.get('quantity')?.invalid && feedingForm.get('quantity')?.touched" />
+            </div>
+
+            <!-- Ate Toggle -->
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-3">
+                <input type="checkbox" formControlName="ate" class="toggle toggle-primary" />
+                <div>
+                  <span class="label-text font-medium">Reptile ate the food</span>
+                  <p class="text-xs text-base-content/50">Uncheck if the reptile refused to eat</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Notes</span>
+              </label>
+              <textarea formControlName="notes" class="textarea textarea-bordered h-20 resize-none"
+                placeholder="Any observations about the feeding..."></textarea>
+            </div>
+          </div>
+
+          <div class="modal-action">
+            <button type="button" class="btn btn-ghost" (click)="cancelFeeding()" [disabled]="feedingLoading()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="feedingLoading() || feedingForm.invalid">
+              @if (feedingLoading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+                Saving...
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Save Feeding Log
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button (click)="cancelFeeding()">close</button>
       </form>
     </div>
   }

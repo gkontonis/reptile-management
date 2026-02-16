@@ -33,12 +33,22 @@ export class ReptileService {
   }
 
   // Feeding logs
+  private feedingLogUrl = '/api/feeding-logs';
+
   getFeedingLogs(reptileId: number): Observable<FeedingLog[]> {
-    return this.http.get<FeedingLog[]>(`${this.apiUrl}/${reptileId}/feeding`);
+    return this.http.get<FeedingLog[]>(`${this.feedingLogUrl}/reptile/${reptileId}`);
   }
 
-  addFeedingLog(reptileId: number, log: Omit<FeedingLog, 'id' | 'reptileId'>): Observable<FeedingLog> {
-    return this.http.post<FeedingLog>(`${this.apiUrl}/${reptileId}/feeding`, log);
+  addFeedingLog(log: Omit<FeedingLog, 'id'>): Observable<FeedingLog> {
+    return this.http.post<FeedingLog>(this.feedingLogUrl, log);
+  }
+
+  updateFeedingLog(id: number, log: FeedingLog): Observable<FeedingLog> {
+    return this.http.put<FeedingLog>(`${this.feedingLogUrl}/${id}`, log);
+  }
+
+  deleteFeedingLog(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.feedingLogUrl}/${id}`);
   }
 
   // Weight logs
