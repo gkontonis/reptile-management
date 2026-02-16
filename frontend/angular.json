@@ -63,15 +63,16 @@
         "serve": {
           "options": {
             "host": "0.0.0.0",
+            "port": 3000,
             "proxyConfig": "proxy.conf.js"
           },
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "home-management-app:build:production"
+              "buildTarget": "reptile-management-app:build:production"
             },
             "development": {
-              "buildTarget": "home-management-app:build:development"
+              "buildTarget": "reptile-management-app:build:development"
             }
           },
           "defaultConfiguration": "development"

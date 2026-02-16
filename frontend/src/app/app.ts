@@ -19,7 +19,7 @@ import { AuthService } from './core/services/auth.service';
 })
 export class App implements OnInit {
   /** Application title displayed in the browser tab */
-  protected title = 'home-management-app';
+  protected title = 'reptile-management-app';
 
   sidebarService = inject(SidebarService);
   authService = inject(AuthService);
