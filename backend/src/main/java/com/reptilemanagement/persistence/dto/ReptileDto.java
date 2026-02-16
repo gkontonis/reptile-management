@@ -46,6 +46,9 @@ public class ReptileDto extends BaseDto<Long> implements Updatable<ReptileDto> {
     /** Current status of the reptile */
     private Reptile.ReptileStatus status;
 
+    /** ID of the user who owns this reptile */
+    private Long userId;
+
     /** Additional notes about the reptile */
     private String notes;
 

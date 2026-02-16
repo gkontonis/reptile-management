@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * Service class for managing reptile operations.
- * Provides business logic for CRUD operations on reptiles.
+ * All operations are scoped to the currently authenticated user.
  */
 @Service
 @RequiredArgsConstructor
@@ -49,145 +50,166 @@ public class ReptileService extends BaseCrudService<Long, Reptile, ReptileDto> {
         return Sort.by(Sort.Direction.ASC, "name");
     }
 
+    // ==================== Helper ====================
+
+    private Long currentUserId() {
+        return authenticationInformationProvider.getAuthenticatedUserId();
+    }
+
     /**
-     * Creates a new reptile.
+     * Verifies that the given reptile belongs to the current user.
+     * @param reptileId the reptile ID to check
+     * @throws AccessDeniedException if the reptile does not belong to the current user
+     */
+    public void verifyOwnership(Long reptileId) {
+        Long userId = currentUserId();
+        if (!reptileRepository.existsByIdAndUserId(reptileId, userId)) {
+            throw new AccessDeniedException("Reptile does not belong to the current user");
+        }
+    }
+
+    // ==================== CRUD ====================
+
+    /**
+     * Creates a new reptile owned by the current user.
      * @param reptileDto the reptile data to create
      * @return the created reptile as DTO
      */
     public ReptileDto createReptile(ReptileDto reptileDto) {
         log.info("Creating new reptile: {}", reptileDto.getName());
+        reptileDto.setUserId(currentUserId());
         return create(reptileDto, new HashMap<>());
     }
 
     /**
-     * Retrieves a reptile by ID.
+     * Retrieves a reptile by ID, scoped to the current user.
      * @param id the reptile ID
-     * @return the reptile as DTO, or empty if not found
+     * @return the reptile as DTO, or empty if not found or not owned
      */
     @Transactional(readOnly = true)
     public Optional<ReptileDto> getReptileById(Long id) {
         log.debug("Retrieving reptile with ID: {}", id);
-        try {
-            return Optional.of(findById(id, new HashMap<>()));
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return reptileRepository.findByIdAndUserId(id, currentUserId())
+                .map(reptileMapper::toDto);
     }
 
     /**
-     * Retrieves all reptiles.
-     * @return list of all reptiles as DTOs
+     * Retrieves all reptiles for the current user.
+     * @return list of the user's reptiles as DTOs
      */
     @Transactional(readOnly = true)
     public List<ReptileDto> getAllReptiles() {
-        log.debug("Retrieving all reptiles");
-
-        return reptileRepository.findAll().stream()
+        log.debug("Retrieving all reptiles for current user");
+        return reptileRepository.findByUserId(currentUserId()).stream()
                 .map(reptileMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves all active reptiles.
+     * Retrieves all active reptiles for the current user.
      * @return list of active reptiles as DTOs
      */
     @Transactional(readOnly = true)
     public List<ReptileDto> getActiveReptiles() {
-        log.debug("Retrieving active reptiles");
-
-        return reptileRepository.findByStatus(Reptile.ReptileStatus.ACTIVE).stream()
+        log.debug("Retrieving active reptiles for current user");
+        return reptileRepository.findByUserIdAndStatus(currentUserId(), Reptile.ReptileStatus.ACTIVE).stream()
                 .map(reptileMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves reptiles by species.
+     * Retrieves reptiles by species for the current user.
      * @param species the species to search for
-     * @return list of reptiles of the specified species
+     * @return list of matching reptiles
      */
     @Transactional(readOnly = true)
     public List<ReptileDto> getReptilesBySpecies(String species) {
         log.debug("Retrieving reptiles by species: {}", species);
-
-        return reptileRepository.findBySpeciesContainingIgnoreCase(species).stream()
+        return reptileRepository.findByUserIdAndSpeciesContainingIgnoreCase(currentUserId(), species).stream()
                 .map(reptileMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves reptiles by name.
+     * Retrieves reptiles by name for the current user.
      * @param name the name to search for
-     * @return list of reptiles with names containing the search term
+     * @return list of matching reptiles
      */
     @Transactional(readOnly = true)
     public List<ReptileDto> getReptilesByName(String name) {
         log.debug("Retrieving reptiles by name: {}", name);
-
-        return reptileRepository.findByNameContainingIgnoreCase(name).stream()
+        return reptileRepository.findByUserIdAndNameContainingIgnoreCase(currentUserId(), name).stream()
                 .map(reptileMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves reptiles in a specific enclosure.
+     * Retrieves reptiles in a specific enclosure for the current user.
      * @param enclosureId the enclosure ID
      * @return list of reptiles in the specified enclosure
      */
     @Transactional(readOnly = true)
     public List<ReptileDto> getReptilesByEnclosure(Long enclosureId) {
         log.debug("Retrieving reptiles in enclosure: {}", enclosureId);
-
-        return reptileRepository.findByEnclosureId(enclosureId).stream()
+        return reptileRepository.findByUserIdAndEnclosureId(currentUserId(), enclosureId).stream()
                 .map(reptileMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Updates an existing reptile.
+     * Updates a reptile, verifying ownership first.
      * @param id the reptile ID to update
      * @param reptileDto the updated reptile data
      * @return the updated reptile as DTO, or empty if not found
      */
     public Optional<ReptileDto> updateReptile(Long id, ReptileDto reptileDto) {
         log.info("Updating reptile with ID: {}", id);
-        
-        try {
-            reptileDto.setId(id);
-            return Optional.of(update(reptileDto, new HashMap<>()));
-        } catch (Exception e) {
-            log.error("Error updating reptile with ID: {}", id, e);
-            return Optional.empty();
-        }
+        Long userId = currentUserId();
+
+        return reptileRepository.findByIdAndUserId(id, userId)
+                .map(existing -> {
+                    try {
+                        reptileDto.setId(id);
+                        reptileDto.setUserId(userId);
+                        return Optional.of(update(reptileDto, new HashMap<>()));
+                    } catch (Exception e) {
+                        log.error("Error updating reptile with ID: {}", id, e);
+                        return Optional.<ReptileDto>empty();
+                    }
+                })
+                .orElse(Optional.empty());
     }
 
     /**
-     * Deletes a reptile by ID.
+     * Deletes a reptile, verifying ownership first.
      * @param id the reptile ID to delete
-     * @return true if deleted, false if not found
+     * @return true if deleted, false if not found or not owned
      */
     public boolean deleteReptile(Long id) {
         log.info("Deleting reptile with ID: {}", id);
+        Long userId = currentUserId();
 
-        if (reptileRepository.existsById(id)) {
+        if (reptileRepository.existsByIdAndUserId(id, userId)) {
             deleteById(id);
             log.info("Deleted reptile with ID: {}", id);
             return true;
         }
 
-        log.warn("Reptile with ID {} not found for deletion", id);
+        log.warn("Reptile with ID {} not found for current user", id);
         return false;
     }
 
     /**
-     * Moves a reptile to a different enclosure.
+     * Moves a reptile to a different enclosure, verifying ownership.
      * @param reptileId the reptile ID
      * @param enclosureId the new enclosure ID (null to remove from enclosure)
-     * @return true if moved successfully, false if reptile not found
+     * @return true if moved successfully
      */
     public boolean moveReptileToEnclosure(Long reptileId, Long enclosureId) {
         log.info("Moving reptile {} to enclosure {}", reptileId, enclosureId);
+        Long userId = currentUserId();
 
-        return reptileRepository.findById(reptileId)
+        return reptileRepository.findByIdAndUserId(reptileId, userId)
                 .map(reptile -> {
                     reptile.setEnclosureId(enclosureId);
                     reptileRepository.save(reptile);
@@ -198,15 +220,16 @@ public class ReptileService extends BaseCrudService<Long, Reptile, ReptileDto> {
     }
 
     /**
-     * Updates the status of a reptile.
+     * Updates the status of a reptile, verifying ownership.
      * @param reptileId the reptile ID
      * @param status the new status
-     * @return true if updated successfully, false if reptile not found
+     * @return true if updated successfully
      */
     public boolean updateReptileStatus(Long reptileId, Reptile.ReptileStatus status) {
         log.info("Updating reptile {} status to {}", reptileId, status);
+        Long userId = currentUserId();
 
-        return reptileRepository.findById(reptileId)
+        return reptileRepository.findByIdAndUserId(reptileId, userId)
                 .map(reptile -> {
                     reptile.setStatus(status);
                     reptileRepository.save(reptile);
@@ -217,18 +240,17 @@ public class ReptileService extends BaseCrudService<Long, Reptile, ReptileDto> {
     }
 
     /**
-     * Sets the highlight image for a reptile.
-     * Validates that the image belongs to the reptile before setting.
+     * Sets the highlight image for a reptile, verifying ownership.
      * @param reptileId the reptile ID
      * @param imageId the image ID to set as highlight
-     * @return the updated reptile as DTO, or empty if reptile not found or image doesn't belong to reptile
+     * @return the updated reptile as DTO
      */
     public Optional<ReptileDto> setHighlightImage(Long reptileId, Long imageId) {
         log.info("Setting highlight image {} for reptile {}", imageId, reptileId);
+        Long userId = currentUserId();
 
-        return reptileRepository.findById(reptileId)
+        return reptileRepository.findByIdAndUserId(reptileId, userId)
                 .flatMap(reptile -> {
-                    // Validate that the image belongs to this reptile
                     Optional<ReptileImage> image = reptileImageRepository.findById(imageId);
 
                     if (image.isEmpty() || !image.get().getReptileId().equals(reptileId)) {
@@ -244,14 +266,15 @@ public class ReptileService extends BaseCrudService<Long, Reptile, ReptileDto> {
     }
 
     /**
-     * Removes the highlight image from a reptile.
+     * Removes the highlight image from a reptile, verifying ownership.
      * @param reptileId the reptile ID
-     * @return true if removed successfully, false if reptile not found
+     * @return true if removed successfully
      */
     public boolean removeHighlightImage(Long reptileId) {
         log.info("Removing highlight image for reptile {}", reptileId);
+        Long userId = currentUserId();
 
-        return reptileRepository.findById(reptileId)
+        return reptileRepository.findByIdAndUserId(reptileId, userId)
                 .map(reptile -> {
                     reptile.setHighlightImageId(null);
                     reptileRepository.save(reptile);
@@ -262,17 +285,18 @@ public class ReptileService extends BaseCrudService<Long, Reptile, ReptileDto> {
     }
 
     /**
-     * Gets statistics about reptiles.
+     * Gets statistics about reptiles for the current user.
      * @return statistics object with counts
      */
     @Transactional(readOnly = true)
     public ReptileStatistics getStatistics() {
-        log.debug("Retrieving reptile statistics");
+        log.debug("Retrieving reptile statistics for current user");
+        Long userId = currentUserId();
 
-        long totalCount = reptileRepository.count();
-        long activeCount = reptileRepository.countByStatus(Reptile.ReptileStatus.ACTIVE);
-        long quarantineCount = reptileRepository.countByStatus(Reptile.ReptileStatus.QUARANTINE);
-        long deceasedCount = reptileRepository.countByStatus(Reptile.ReptileStatus.DECEASED);
+        long totalCount = reptileRepository.countByUserId(userId);
+        long activeCount = reptileRepository.countByUserIdAndStatus(userId, Reptile.ReptileStatus.ACTIVE);
+        long quarantineCount = reptileRepository.countByUserIdAndStatus(userId, Reptile.ReptileStatus.QUARANTINE);
+        long deceasedCount = reptileRepository.countByUserIdAndStatus(userId, Reptile.ReptileStatus.DECEASED);
 
         return new ReptileStatistics(totalCount, activeCount, quarantineCount, deceasedCount);
     }

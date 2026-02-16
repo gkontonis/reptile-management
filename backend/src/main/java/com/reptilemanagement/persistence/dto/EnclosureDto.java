@@ -44,6 +44,9 @@ public class EnclosureDto extends BaseDto<Long> implements Updatable<EnclosureDt
     /** Temperature range maintained */
     private String temperature;
 
+    /** ID of the user who owns this enclosure */
+    private Long userId;
+
     /** Additional notes about the enclosure */
     private String notes;
 

@@ -70,6 +70,11 @@ public class DatabaseInitializer implements CommandLineRunner {
         
         if (reptileCount == 0) {
             log.info("No reptiles found. Creating test reptile data for UI testing...");
+
+            // Resolve the admin user ID to assign ownership
+            Long adminUserId = userRepository.findByUsername("admin")
+                    .map(User::getId)
+                    .orElse(null);
             
             // Test Reptile 1: Butters - Ball Python
             Reptile butters = new Reptile();
@@ -81,6 +86,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             butters.setAcquisitionDate(LocalDate.of(2023, 5, 3));
             butters.setStatus(Reptile.ReptileStatus.ACTIVE);
             butters.setNotes("Beautiful banana spider morph with stunning yellow coloration.");
+            butters.setUserId(adminUserId);
             reptileRepository.save(butters);
             
             // Test Reptile 2: Bearded Dragon
@@ -93,6 +99,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             beardedDragon.setAcquisitionDate(LocalDate.of(2021, 10, 15));
             beardedDragon.setStatus(Reptile.ReptileStatus.ACTIVE);
             beardedDragon.setNotes("Loves crickets and greens. Enjoys basking under heat lamp.");
+            beardedDragon.setUserId(adminUserId);
             reptileRepository.save(beardedDragon);
             
             log.info("======================================");

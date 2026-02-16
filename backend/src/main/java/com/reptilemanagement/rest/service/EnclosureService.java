@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 /**
  * Service class for managing enclosure operations.
- * Provides business logic for CRUD operations on enclosures.
+ * All operations are scoped to the currently authenticated user.
  */
 @Service
 @RequiredArgsConstructor
@@ -46,128 +47,149 @@ public class EnclosureService extends BaseCrudService<Long, Enclosure, Enclosure
         return Sort.by(Sort.Direction.ASC, "name");
     }
 
+    // ==================== Helper ====================
+
+    private Long currentUserId() {
+        return authenticationInformationProvider.getAuthenticatedUserId();
+    }
+
     /**
-     * Creates a new enclosure.
+     * Verifies that the given enclosure belongs to the current user.
+     * @param enclosureId the enclosure ID to check
+     * @throws AccessDeniedException if the enclosure does not belong to the current user
+     */
+    public void verifyOwnership(Long enclosureId) {
+        Long userId = currentUserId();
+        if (!enclosureRepository.existsByIdAndUserId(enclosureId, userId)) {
+            throw new AccessDeniedException("Enclosure does not belong to the current user");
+        }
+    }
+
+    // ==================== CRUD ====================
+
+    /**
+     * Creates a new enclosure owned by the current user.
      * @param enclosureDto the enclosure data to create
      * @return the created enclosure as DTO
      */
     public EnclosureDto createEnclosure(EnclosureDto enclosureDto) {
         log.info("Creating new enclosure: {}", enclosureDto.getName());
+        enclosureDto.setUserId(currentUserId());
         return create(enclosureDto, new HashMap<>());
     }
 
     /**
-     * Retrieves an enclosure by ID.
+     * Retrieves an enclosure by ID, scoped to the current user.
      * @param id the enclosure ID
-     * @return the enclosure as DTO, or empty if not found
+     * @return the enclosure as DTO, or empty if not found or not owned
      */
     @Transactional(readOnly = true)
     public Optional<EnclosureDto> getEnclosureById(Long id) {
         log.debug("Retrieving enclosure with ID: {}", id);
-        try {
-            return Optional.of(findById(id, new HashMap<>()));
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return enclosureRepository.findByIdAndUserId(id, currentUserId())
+                .map(enclosureMapper::toDto);
     }
 
     /**
-     * Retrieves all enclosures.
-     * @return list of all enclosures as DTOs
+     * Retrieves all enclosures for the current user.
+     * @return list of the user's enclosures as DTOs
      */
     @Transactional(readOnly = true)
     public List<EnclosureDto> getAllEnclosures() {
-        log.debug("Retrieving all enclosures");
-
-        return enclosureRepository.findAll().stream()
+        log.debug("Retrieving all enclosures for current user");
+        return enclosureRepository.findByUserId(currentUserId()).stream()
                 .map(enclosureMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves enclosures by type.
+     * Retrieves enclosures by type for the current user.
      * @param type the enclosure type
      * @return list of enclosures of the specified type
      */
     @Transactional(readOnly = true)
     public List<EnclosureDto> getEnclosuresByType(Enclosure.EnclosureType type) {
         log.debug("Retrieving enclosures by type: {}", type);
-
-        return enclosureRepository.findByType(type).stream()
+        return enclosureRepository.findByUserIdAndType(currentUserId(), type).stream()
                 .map(enclosureMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves enclosures by name.
+     * Retrieves enclosures by name for the current user.
      * @param name the name to search for
      * @return list of enclosures with names containing the search term
      */
     @Transactional(readOnly = true)
     public List<EnclosureDto> getEnclosuresByName(String name) {
         log.debug("Retrieving enclosures by name: {}", name);
-
-        return enclosureRepository.findByNameContainingIgnoreCase(name).stream()
+        return enclosureRepository.findByUserIdAndNameContainingIgnoreCase(currentUserId(), name).stream()
                 .map(enclosureMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves enclosures that are currently occupied by reptiles.
+     * Retrieves occupied enclosure IDs for the current user.
      * @return list of occupied enclosure IDs
      */
     @Transactional(readOnly = true)
     public List<Long> getOccupiedEnclosureIds() {
-        log.debug("Retrieving occupied enclosure IDs");
-
-        return enclosureRepository.findOccupiedEnclosureIds();
+        log.debug("Retrieving occupied enclosure IDs for current user");
+        return enclosureRepository.findOccupiedEnclosureIdsByUserId(currentUserId());
     }
 
     /**
-     * Retrieves enclosures that are currently empty.
+     * Retrieves empty enclosures for the current user.
      * @return list of empty enclosures as DTOs
      */
     @Transactional(readOnly = true)
     public List<EnclosureDto> getEmptyEnclosures() {
-        log.debug("Retrieving empty enclosures");
-
-        return enclosureRepository.findEmptyEnclosures().stream()
+        log.debug("Retrieving empty enclosures for current user");
+        return enclosureRepository.findEmptyEnclosuresByUserId(currentUserId()).stream()
                 .map(enclosureMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Updates an existing enclosure.
+     * Updates an enclosure, verifying ownership first.
      * @param id the enclosure ID to update
      * @param enclosureDto the updated enclosure data
      * @return the updated enclosure as DTO, or empty if not found
      */
     public Optional<EnclosureDto> updateEnclosure(Long id, EnclosureDto enclosureDto) {
         log.info("Updating enclosure with ID: {}", id);
-        try {
-            enclosureDto.setId(id);
-            return Optional.of(update(enclosureDto, new HashMap<>()));
-        } catch (Exception e) {
-            log.error("Error updating enclosure with ID: {}", id, e);
-            return Optional.empty();
-        }
+        Long userId = currentUserId();
+
+        return enclosureRepository.findByIdAndUserId(id, userId)
+                .map(existing -> {
+                    try {
+                        enclosureDto.setId(id);
+                        enclosureDto.setUserId(userId);
+                        return Optional.of(update(enclosureDto, new HashMap<>()));
+                    } catch (Exception e) {
+                        log.error("Error updating enclosure with ID: {}", id, e);
+                        return Optional.<EnclosureDto>empty();
+                    }
+                })
+                .orElse(Optional.empty());
     }
 
     /**
-     * Deletes an enclosure by ID.
+     * Deletes an enclosure, verifying ownership first.
      * @param id the enclosure ID to delete
-     * @return true if deleted, false if not found
+     * @return true if deleted, false if not found or not owned
      */
     public boolean deleteEnclosure(Long id) {
         log.info("Deleting enclosure with ID: {}", id);
+        Long userId = currentUserId();
 
-        if (enclosureRepository.existsById(id)) {
+        if (enclosureRepository.existsByIdAndUserId(id, userId)) {
             deleteById(id);
             log.info("Deleted enclosure with ID: {}", id);
             return true;
         }
 
-        log.warn("Enclosure with ID {} not found for deletion", id);
+        log.warn("Enclosure with ID {} not found for current user", id);
         return false;
     }
 
@@ -179,24 +201,24 @@ public class EnclosureService extends BaseCrudService<Long, Enclosure, Enclosure
     @Transactional(readOnly = true)
     public boolean canDeleteEnclosure(Long enclosureId) {
         log.debug("Checking if enclosure {} can be deleted", enclosureId);
-
         List<Long> occupiedIds = getOccupiedEnclosureIds();
         return !occupiedIds.contains(enclosureId);
     }
 
     /**
-     * Gets statistics about enclosures.
+     * Gets statistics about enclosures for the current user.
      * @return statistics object with enclosure information
      */
     @Transactional(readOnly = true)
     public EnclosureStatistics getStatistics() {
-        log.debug("Retrieving enclosure statistics");
+        log.debug("Retrieving enclosure statistics for current user");
+        Long userId = currentUserId();
 
-        long totalCount = enclosureRepository.count();
-        long terrariumCount = enclosureRepository.countByType(Enclosure.EnclosureType.TERRARIUM);
-        long vivariumCount = enclosureRepository.countByType(Enclosure.EnclosureType.VIVARIUM);
+        long totalCount = enclosureRepository.countByUserId(userId);
+        long terrariumCount = enclosureRepository.countByUserIdAndType(userId, Enclosure.EnclosureType.TERRARIUM);
+        long vivariumCount = enclosureRepository.countByUserIdAndType(userId, Enclosure.EnclosureType.VIVARIUM);
         long occupiedCount = getOccupiedEnclosureIds().size();
-        long emptyCount = enclosureRepository.findEmptyEnclosures().size();
+        long emptyCount = enclosureRepository.findEmptyEnclosuresByUserId(userId).size();
 
         return new EnclosureStatistics(totalCount, terrariumCount, vivariumCount, occupiedCount, emptyCount);
     }

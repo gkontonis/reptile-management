@@ -58,6 +58,10 @@ public class Reptile extends BaseEntity<Long> implements EntityUpdatable<Reptile
     @Column(nullable = false)
     private ReptileStatus status = ReptileStatus.ACTIVE;
 
+    /** ID of the user who owns this reptile */
+    @Column(name = "user_id")
+    private Long userId;
+
     /** Additional notes about the reptile */
     @Column(length = 1000)
     private String notes;

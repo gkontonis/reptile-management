@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for Reptile entity operations.
@@ -14,6 +15,82 @@ import java.util.List;
  */
 @Repository
 public interface ReptileRepository extends JpaRepository<Reptile, Long> {
+
+    // ==================== User-scoped queries ====================
+
+    /**
+     * Finds all reptiles belonging to a specific user.
+     * @param userId the ID of the user
+     * @return list of reptiles owned by the user
+     */
+    List<Reptile> findByUserId(Long userId);
+
+    /**
+     * Finds a reptile by ID only if it belongs to the given user.
+     * @param id the reptile ID
+     * @param userId the user ID
+     * @return the reptile if found and owned by the user
+     */
+    Optional<Reptile> findByIdAndUserId(Long id, Long userId);
+
+    /**
+     * Checks if a reptile exists and belongs to the given user.
+     * @param id the reptile ID
+     * @param userId the user ID
+     * @return true if the reptile exists and belongs to the user
+     */
+    boolean existsByIdAndUserId(Long id, Long userId);
+
+    /**
+     * Finds reptiles by status for a specific user.
+     * @param userId the user ID
+     * @param status the reptile status
+     * @return list of reptiles matching the status for the user
+     */
+    List<Reptile> findByUserIdAndStatus(Long userId, Reptile.ReptileStatus status);
+
+    /**
+     * Counts reptiles belonging to a specific user.
+     * @param userId the user ID
+     * @return count of reptiles owned by the user
+     */
+    long countByUserId(Long userId);
+
+    /**
+     * Counts reptiles by status for a specific user.
+     * @param userId the user ID
+     * @param status the reptile status
+     * @return count of reptiles matching the status for the user
+     */
+    long countByUserIdAndStatus(Long userId, Reptile.ReptileStatus status);
+
+    /**
+     * Finds reptiles by species for a specific user (case-insensitive).
+     * @param userId the user ID
+     * @param species the species search term
+     * @return list of reptiles matching the species for the user
+     */
+    @Query("SELECT r FROM Reptile r WHERE r.userId = :userId AND LOWER(r.species) LIKE LOWER(CONCAT('%', :species, '%'))")
+    List<Reptile> findByUserIdAndSpeciesContainingIgnoreCase(@Param("userId") Long userId, @Param("species") String species);
+
+    /**
+     * Finds reptiles by name for a specific user (case-insensitive).
+     * @param userId the user ID
+     * @param name the name search term
+     * @return list of reptiles matching the name for the user
+     */
+    @Query("SELECT r FROM Reptile r WHERE r.userId = :userId AND LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Reptile> findByUserIdAndNameContainingIgnoreCase(@Param("userId") Long userId, @Param("name") String name);
+
+    /**
+     * Finds reptiles in a specific enclosure for a specific user.
+     * @param userId the user ID
+     * @param enclosureId the enclosure ID
+     * @return list of reptiles in the enclosure owned by the user
+     */
+    List<Reptile> findByUserIdAndEnclosureId(Long userId, Long enclosureId);
+
+    // ==================== Non-scoped queries (legacy) ====================
 
     /**
      * Finds all reptiles that are currently active.

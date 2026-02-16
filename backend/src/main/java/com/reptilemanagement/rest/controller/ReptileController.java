@@ -220,6 +220,7 @@ public class ReptileController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "description", required = false) String description) throws IOException {
         log.info("REST request to upload image for reptile: {}", id);
+        reptileService.verifyOwnership(id);
 
         ReptileImageDto result = reptileImageService.uploadImage(id, file, description);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -234,6 +235,7 @@ public class ReptileController {
     @GetMapping("/{id}/images")
     public ResponseEntity<List<ReptileImageDto>> getImages(@PathVariable Long id) {
         log.debug("REST request to get images for reptile: {}", id);
+        reptileService.verifyOwnership(id);
 
         List<ReptileImageDto> images = reptileImageService.getImagesByReptileId(id);
         return ResponseEntity.ok(images);
@@ -271,6 +273,7 @@ public class ReptileController {
     @DeleteMapping("/{id}/images/{imageId}")
     public ResponseEntity<Void> deleteImage(@PathVariable Long id, @PathVariable Long imageId) {
         log.info("REST request to delete image {} for reptile: {}", imageId, id);
+        reptileService.verifyOwnership(id);
 
         // First verify the image belongs to this reptile
         boolean belongs = reptileImageService.getImageMetadataById(imageId)

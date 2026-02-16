@@ -52,6 +52,10 @@ public class Enclosure extends BaseEntity<Long> implements EntityUpdatable<Enclo
     /** Temperature range maintained */
     private String temperature;
 
+    /** ID of the user who owns this enclosure */
+    @Column(name = "user_id")
+    private Long userId;
+
     /** Additional notes about the enclosure */
     @Column(length = 1000)
     private String notes;
