@@ -62,6 +62,10 @@ export class ReptileService {
     return this.http.post<WeightLog>(this.weightLogUrl, log);
   }
 
+  deleteWeightLog(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.weightLogUrl}/${id}`);
+  }
+
   // Shedding logs
   private sheddingLogUrl = '/api/shedding-logs';
 

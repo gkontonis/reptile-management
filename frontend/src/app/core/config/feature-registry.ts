@@ -92,6 +92,26 @@ export const FEATURE_CONFIGS: FeatureConfig[] = [
         canActivate: [authGuard]
       }
     ]
+  },
+  {
+    name: 'user-management',
+    enabled: FEATURE_FLAGS.userManagement,
+    routes: [
+      {
+        path: 'admin/users',
+        loadComponent: () => import('../../features/admin/user-management/user-management.component').then(m => m.UserManagementComponent),
+        canActivate: [authGuard, adminGuard]
+      }
+    ],
+    navigation: [
+      {
+        label: 'User Management',
+        route: '/admin/users',
+        icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+        adminOnly: true,
+        feature: 'userManagement'
+      }
+    ]
   }
 ];
 

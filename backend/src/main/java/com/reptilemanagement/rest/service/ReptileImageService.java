@@ -97,6 +97,15 @@ public class ReptileImageService extends BaseCrudService<Long, ReptileImage, Rep
         ReptileImage savedImage = reptileImageRepository.save(image);
         log.info("Uploaded image with ID: {} for reptile: {}", savedImage.getId(), reptileId);
 
+        // Auto-set as highlight if this is the only image for the reptile
+        if (reptileImageRepository.countByReptileId(reptileId) == 1) {
+            reptileRepository.findById(reptileId).ifPresent(reptile -> {
+                reptile.setHighlightImageId(savedImage.getId());
+                reptileRepository.save(reptile);
+                log.info("Auto-set highlight image to {} for reptile {}", savedImage.getId(), reptileId);
+            });
+        }
+
         return reptileImageMapper.toDto(savedImage);
     }
 

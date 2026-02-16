@@ -39,8 +39,8 @@ export interface FeedingLog {
 export interface WeightLog {
   id: number;
   reptileId: number;
-  weightDate: string;
-  weight: number;
+  measurementDate: string;
+  weightGrams: number;
   notes?: string;
 }
 

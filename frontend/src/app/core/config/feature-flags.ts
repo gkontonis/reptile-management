@@ -4,7 +4,7 @@ export const FEATURE_FLAGS = {
   todos: false,
 
   // Disabled - not used in reptile management
-  userManagement: false,
+  userManagement: true,
 
   // Core reptile management functionality
   reptileManagement: true,

@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ReptileDetail, ReptileImage, FeedingLog, SheddingLog, EnclosureCleaning } from '../models/reptile.model';
+import { ReptileDetail, ReptileImage, FeedingLog, SheddingLog, EnclosureCleaning, WeightLog } from '../models/reptile.model';
 import { ReptileService } from '../services/reptile.service';
 
 @Component({
@@ -33,6 +33,10 @@ export class ReptileDetailComponent implements OnInit {
   sheddingLogs = signal<SheddingLog[]>([]);
   sheddingLogsLoading = signal<boolean>(false);
 
+  // Weight logs
+  weightLogs = signal<WeightLog[]>([]);
+  weightLogsLoading = signal<boolean>(false);
+
   // Cleaning logs
   cleaningLogs = signal<EnclosureCleaning[]>([]);
   cleaningLogsLoading = signal<boolean>(false);
@@ -48,6 +52,16 @@ export class ReptileDetailComponent implements OnInit {
     return logs.length > 0 ? logs[0].sheddingDate : undefined;
   });
 
+  lastWeightDate = computed(() => {
+    const logs = this.weightLogs();
+    return logs.length > 0 ? logs[0].measurementDate : undefined;
+  });
+
+  latestWeight = computed(() => {
+    const logs = this.weightLogs();
+    return logs.length > 0 ? logs[0].weightGrams : undefined;
+  });
+
   lastCleanedDate = computed(() => {
     const logs = this.cleaningLogs();
     return logs.length > 0 ? logs[0].cleaningDate : undefined;
@@ -59,12 +73,14 @@ export class ReptileDetailComponent implements OnInit {
   showFeedingModal = signal<boolean>(false);
   showSheddingModal = signal<boolean>(false);
   showCleaningModal = signal<boolean>(false);
+  showWeightModal = signal<boolean>(false);
   showActivityMenu = signal<boolean>(false);
   deleteLoading = signal<boolean>(false);
   editLoading = signal<boolean>(false);
   feedingLoading = signal<boolean>(false);
   sheddingLoading = signal<boolean>(false);
   cleaningLoading = signal<boolean>(false);
+  weightLoading = signal<boolean>(false);
 
   // Edit form
   editForm: FormGroup = this.fb.group({
@@ -136,6 +152,13 @@ export class ReptileDetailComponent implements OnInit {
     notes: ['', Validators.maxLength(500)]
   });
 
+  // Weight form
+  weightForm: FormGroup = this.fb.group({
+    measurementDate: ['', Validators.required],
+    weightGrams: [null, [Validators.required, Validators.min(0.01)]],
+    notes: ['', Validators.maxLength(500)]
+  });
+
   cleaningTypeOptions = [
     { value: 'SPOT_CLEAN', label: 'Spot Clean' },
     { value: 'FULL_CLEAN', label: 'Full Clean' },
@@ -171,6 +194,7 @@ export class ReptileDetailComponent implements OnInit {
       this.loadImages(+id);
       this.loadFeedingLogs(+id);
       this.loadSheddingLogs(+id);
+      this.loadWeightLogs(+id);
     }
   }
 
@@ -624,6 +648,87 @@ export class ReptileDetailComponent implements OnInit {
         this.cleaningForm.get(key)?.markAsTouched();
       });
     }
+  }
+
+  // Weight log methods
+  loadWeightLogs(reptileId: number): void {
+    this.weightLogsLoading.set(true);
+    this.reptileService.getWeightLogs(reptileId).subscribe({
+      next: (logs) => {
+        const sorted = logs.sort((a, b) =>
+          new Date(b.measurementDate).getTime() - new Date(a.measurementDate).getTime()
+        );
+        this.weightLogs.set(sorted);
+        this.weightLogsLoading.set(false);
+      },
+      error: (err) => {
+        this.weightLogsLoading.set(false);
+        console.error('Error loading weight logs:', err);
+      }
+    });
+  }
+
+  openWeightModal(): void {
+    const now = new Date();
+    const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    this.weightForm.reset({ measurementDate: localIso, weightGrams: null, notes: '' });
+    this.showWeightModal.set(true);
+    this.showActivityMenu.set(false);
+  }
+
+  cancelWeight(): void {
+    this.showWeightModal.set(false);
+    this.weightForm.reset();
+  }
+
+  onSubmitWeight(): void {
+    if (this.weightForm.valid) {
+      const reptile = this.reptile();
+      if (!reptile) return;
+
+      this.weightLoading.set(true);
+      const formValue = this.weightForm.value;
+
+      const log = {
+        reptileId: reptile.id,
+        measurementDate: new Date(formValue.measurementDate).toISOString(),
+        weightGrams: formValue.weightGrams,
+        notes: formValue.notes || null
+      };
+
+      this.reptileService.addWeightLog(log).subscribe({
+        next: () => {
+          this.weightLoading.set(false);
+          this.showWeightModal.set(false);
+          this.weightForm.reset();
+          this.loadWeightLogs(reptile.id);
+        },
+        error: (err) => {
+          this.weightLoading.set(false);
+          console.error('Error creating weight log:', err);
+          this.error.set('Failed to create weight log. Please try again.');
+        }
+      });
+    } else {
+      Object.keys(this.weightForm.controls).forEach(key => {
+        this.weightForm.get(key)?.markAsTouched();
+      });
+    }
+  }
+
+  onDeleteWeightLog(logId: number): void {
+    const reptile = this.reptile();
+    if (!reptile) return;
+
+    this.reptileService.deleteWeightLog(logId).subscribe({
+      next: () => {
+        this.loadWeightLogs(reptile.id);
+      },
+      error: (err) => {
+        console.error('Error deleting weight log:', err);
+        this.error.set('Failed to delete weight log. Please try again.');
+      }
+    });
   }
 
   toggleActivityMenu(): void {
