@@ -1,8 +1,8 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ReptileDetail, ReptileImage, FeedingLog } from '../models/reptile.model';
+import { ReptileDetail, ReptileImage, FeedingLog, SheddingLog, EnclosureCleaning } from '../models/reptile.model';
 import { ReptileService } from '../services/reptile.service';
 
 @Component({
@@ -29,13 +29,42 @@ export class ReptileDetailComponent implements OnInit {
   feedingLogs = signal<FeedingLog[]>([]);
   feedingLogsLoading = signal<boolean>(false);
 
+  // Shedding logs
+  sheddingLogs = signal<SheddingLog[]>([]);
+  sheddingLogsLoading = signal<boolean>(false);
+
+  // Cleaning logs
+  cleaningLogs = signal<EnclosureCleaning[]>([]);
+  cleaningLogsLoading = signal<boolean>(false);
+
+  // Derived dates from logs
+  lastFedDate = computed(() => {
+    const logs = this.feedingLogs();
+    return logs.length > 0 ? logs[0].feedingDate : undefined;
+  });
+
+  lastShedDate = computed(() => {
+    const logs = this.sheddingLogs();
+    return logs.length > 0 ? logs[0].sheddingDate : undefined;
+  });
+
+  lastCleanedDate = computed(() => {
+    const logs = this.cleaningLogs();
+    return logs.length > 0 ? logs[0].cleaningDate : undefined;
+  });
+
   // Modal states
   showDeleteModal = signal<boolean>(false);
   showEditModal = signal<boolean>(false);
   showFeedingModal = signal<boolean>(false);
+  showSheddingModal = signal<boolean>(false);
+  showCleaningModal = signal<boolean>(false);
+  showActivityMenu = signal<boolean>(false);
   deleteLoading = signal<boolean>(false);
   editLoading = signal<boolean>(false);
   feedingLoading = signal<boolean>(false);
+  sheddingLoading = signal<boolean>(false);
+  cleaningLoading = signal<boolean>(false);
 
   // Edit form
   editForm: FormGroup = this.fb.group({
@@ -84,6 +113,36 @@ export class ReptileDetailComponent implements OnInit {
     'Fruit'
   ];
 
+  // Shedding form
+  sheddingForm: FormGroup = this.fb.group({
+    sheddingDate: ['', Validators.required],
+    shedQuality: ['COMPLETE', Validators.required],
+    ateShed: [false],
+    notes: ['', Validators.maxLength(500)]
+  });
+
+  shedQualityOptions = [
+    { value: 'COMPLETE', label: 'Complete' },
+    { value: 'PARTIAL', label: 'Partial' },
+    { value: 'INCOMPLETE', label: 'Incomplete' }
+  ];
+
+  // Cleaning form
+  cleaningForm: FormGroup = this.fb.group({
+    cleaningDate: ['', Validators.required],
+    cleaningType: ['SPOT_CLEAN', Validators.required],
+    substrateChanged: [false],
+    disinfected: [false],
+    notes: ['', Validators.maxLength(500)]
+  });
+
+  cleaningTypeOptions = [
+    { value: 'SPOT_CLEAN', label: 'Spot Clean' },
+    { value: 'FULL_CLEAN', label: 'Full Clean' },
+    { value: 'WATER_CHANGE', label: 'Water Change' },
+    { value: 'DEEP_CLEAN', label: 'Deep Clean' }
+  ];
+
   genderOptions = [
     { value: 'MALE', label: 'Male' },
     { value: 'FEMALE', label: 'Female' },
@@ -111,6 +170,7 @@ export class ReptileDetailComponent implements OnInit {
       this.loadReptile(+id);
       this.loadImages(+id);
       this.loadFeedingLogs(+id);
+      this.loadSheddingLogs(+id);
     }
   }
 
@@ -127,12 +187,6 @@ export class ReptileDetailComponent implements OnInit {
         );
         this.feedingLogs.set(sorted);
         this.feedingLogsLoading.set(false);
-
-        // Update lastFedDate from most recent feeding log
-        const reptile = this.reptile();
-        if (reptile && sorted.length > 0) {
-          this.reptile.set({ ...reptile, lastFedDate: sorted[0].feedingDate });
-        }
       },
       error: (err) => {
         this.feedingLogsLoading.set(false);
@@ -189,6 +243,7 @@ export class ReptileDetailComponent implements OnInit {
       next: (reptile) => {
         this.reptile.set(reptile);
         this.loading.set(false);
+        this.loadCleaningLogs(reptile.enclosureId);
       },
       error: (err) => {
         this.loading.set(false);
@@ -352,6 +407,7 @@ export class ReptileDetailComponent implements OnInit {
     const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     this.feedingForm.reset({ feedingDate: localIso, ate: true, foodType: '', quantity: '', notes: '' });
     this.showFeedingModal.set(true);
+    this.showActivityMenu.set(false);
   }
 
   cancelFeeding(): void {
@@ -395,6 +451,183 @@ export class ReptileDetailComponent implements OnInit {
         this.feedingForm.get(key)?.markAsTouched();
       });
     }
+  }
+
+  onDeleteFeedingLog(logId: number): void {
+    const reptile = this.reptile();
+    if (!reptile) return;
+
+    this.reptileService.deleteFeedingLog(logId).subscribe({
+      next: () => {
+        this.loadFeedingLogs(reptile.id);
+      },
+      error: (err) => {
+        console.error('Error deleting feeding log:', err);
+        this.error.set('Failed to delete feeding log. Please try again.');
+      }
+    });
+  }
+
+  // Shedding log methods
+  loadSheddingLogs(reptileId: number): void {
+    this.sheddingLogsLoading.set(true);
+    this.reptileService.getSheddingLogs(reptileId).subscribe({
+      next: (logs) => {
+        const sorted = logs.sort((a, b) =>
+          new Date(b.sheddingDate).getTime() - new Date(a.sheddingDate).getTime()
+        );
+        this.sheddingLogs.set(sorted);
+        this.sheddingLogsLoading.set(false);
+      },
+      error: (err) => {
+        this.sheddingLogsLoading.set(false);
+        console.error('Error loading shedding logs:', err);
+      }
+    });
+  }
+
+  openSheddingModal(): void {
+    const now = new Date();
+    const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    this.sheddingForm.reset({ sheddingDate: localIso, shedQuality: 'COMPLETE', ateShed: false, notes: '' });
+    this.showSheddingModal.set(true);
+    this.showActivityMenu.set(false);
+  }
+
+  cancelShedding(): void {
+    this.showSheddingModal.set(false);
+    this.sheddingForm.reset();
+  }
+
+  onSubmitShedding(): void {
+    if (this.sheddingForm.valid) {
+      const reptile = this.reptile();
+      if (!reptile) return;
+
+      this.sheddingLoading.set(true);
+      const formValue = this.sheddingForm.value;
+
+      const log = {
+        reptileId: reptile.id,
+        sheddingDate: new Date(formValue.sheddingDate).toISOString(),
+        shedQuality: formValue.shedQuality,
+        ateShed: formValue.ateShed,
+        notes: formValue.notes || null
+      };
+
+      this.reptileService.addSheddingLog(log).subscribe({
+        next: () => {
+          this.sheddingLoading.set(false);
+          this.showSheddingModal.set(false);
+          this.sheddingForm.reset();
+          this.loadSheddingLogs(reptile.id);
+        },
+        error: (err) => {
+          this.sheddingLoading.set(false);
+          console.error('Error creating shedding log:', err);
+          this.error.set('Failed to create shedding log. Please try again.');
+        }
+      });
+    } else {
+      Object.keys(this.sheddingForm.controls).forEach(key => {
+        this.sheddingForm.get(key)?.markAsTouched();
+      });
+    }
+  }
+
+  onDeleteSheddingLog(logId: number): void {
+    const reptile = this.reptile();
+    if (!reptile) return;
+
+    this.reptileService.deleteSheddingLog(logId).subscribe({
+      next: () => {
+        this.loadSheddingLogs(reptile.id);
+      },
+      error: (err) => {
+        console.error('Error deleting shedding log:', err);
+        this.error.set('Failed to delete shedding log. Please try again.');
+      }
+    });
+  }
+
+  // Cleaning log methods
+  loadCleaningLogs(enclosureId: number | undefined): void {
+    if (!enclosureId) return;
+
+    this.cleaningLogsLoading.set(true);
+    this.reptileService.getEnclosureCleaningLogs(enclosureId).subscribe({
+      next: (logs) => {
+        const sorted = logs.sort((a, b) =>
+          new Date(b.cleaningDate).getTime() - new Date(a.cleaningDate).getTime()
+        );
+        this.cleaningLogs.set(sorted);
+        this.cleaningLogsLoading.set(false);
+      },
+      error: (err) => {
+        this.cleaningLogsLoading.set(false);
+        console.error('Error loading cleaning logs:', err);
+      }
+    });
+  }
+
+  openCleaningModal(): void {
+    const reptile = this.reptile();
+    if (!reptile?.enclosureId) {
+      this.error.set('This reptile is not assigned to an enclosure. Assign an enclosure first to log cleaning.');
+      this.showActivityMenu.set(false);
+      return;
+    }
+    const now = new Date();
+    const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    this.cleaningForm.reset({ cleaningDate: localIso, cleaningType: 'SPOT_CLEAN', substrateChanged: false, disinfected: false, notes: '' });
+    this.showCleaningModal.set(true);
+    this.showActivityMenu.set(false);
+  }
+
+  cancelCleaning(): void {
+    this.showCleaningModal.set(false);
+    this.cleaningForm.reset();
+  }
+
+  onSubmitCleaning(): void {
+    if (this.cleaningForm.valid) {
+      const reptile = this.reptile();
+      if (!reptile?.enclosureId) return;
+
+      this.cleaningLoading.set(true);
+      const formValue = this.cleaningForm.value;
+
+      const log = {
+        enclosureId: reptile.enclosureId,
+        cleaningDate: new Date(formValue.cleaningDate).toISOString(),
+        cleaningType: formValue.cleaningType,
+        substrateChanged: formValue.substrateChanged,
+        disinfected: formValue.disinfected,
+        notes: formValue.notes || null
+      };
+
+      this.reptileService.addEnclosureCleaningLog(log).subscribe({
+        next: () => {
+          this.cleaningLoading.set(false);
+          this.showCleaningModal.set(false);
+          this.cleaningForm.reset();
+          this.loadCleaningLogs(reptile.enclosureId);
+        },
+        error: (err) => {
+          this.cleaningLoading.set(false);
+          console.error('Error creating cleaning log:', err);
+          this.error.set('Failed to create cleaning log. Please try again.');
+        }
+      });
+    } else {
+      Object.keys(this.cleaningForm.controls).forEach(key => {
+        this.cleaningForm.get(key)?.markAsTouched();
+      });
+    }
+  }
+
+  toggleActivityMenu(): void {
+    this.showActivityMenu.set(!this.showActivityMenu());
   }
 
   // Image methods

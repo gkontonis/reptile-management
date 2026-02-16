@@ -52,21 +52,33 @@ export class ReptileService {
   }
 
   // Weight logs
+  private weightLogUrl = '/api/weight-logs';
+
   getWeightLogs(reptileId: number): Observable<WeightLog[]> {
-    return this.http.get<WeightLog[]>(`${this.apiUrl}/${reptileId}/weight`);
+    return this.http.get<WeightLog[]>(`${this.weightLogUrl}/reptile/${reptileId}`);
   }
 
-  addWeightLog(reptileId: number, log: Omit<WeightLog, 'id' | 'reptileId'>): Observable<WeightLog> {
-    return this.http.post<WeightLog>(`${this.apiUrl}/${reptileId}/weight`, log);
+  addWeightLog(log: Omit<WeightLog, 'id'>): Observable<WeightLog> {
+    return this.http.post<WeightLog>(this.weightLogUrl, log);
   }
 
   // Shedding logs
+  private sheddingLogUrl = '/api/shedding-logs';
+
   getSheddingLogs(reptileId: number): Observable<SheddingLog[]> {
-    return this.http.get<SheddingLog[]>(`${this.apiUrl}/${reptileId}/shedding`);
+    return this.http.get<SheddingLog[]>(`${this.sheddingLogUrl}/reptile/${reptileId}`);
   }
 
-  addSheddingLog(reptileId: number, log: Omit<SheddingLog, 'id' | 'reptileId'>): Observable<SheddingLog> {
-    return this.http.post<SheddingLog>(`${this.apiUrl}/${reptileId}/shedding`, log);
+  addSheddingLog(log: Omit<SheddingLog, 'id'>): Observable<SheddingLog> {
+    return this.http.post<SheddingLog>(this.sheddingLogUrl, log);
+  }
+
+  updateSheddingLog(id: number, log: SheddingLog): Observable<SheddingLog> {
+    return this.http.put<SheddingLog>(`${this.sheddingLogUrl}/${id}`, log);
+  }
+
+  deleteSheddingLog(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.sheddingLogUrl}/${id}`);
   }
 
   // Poop logs
@@ -98,12 +110,14 @@ export class ReptileService {
   }
 
   // Enclosure cleaning logs
+  private cleaningLogUrl = '/api/enclosure-cleanings';
+
   getEnclosureCleaningLogs(enclosureId: number): Observable<EnclosureCleaning[]> {
-    return this.http.get<EnclosureCleaning[]>(`/api/enclosures/${enclosureId}/cleaning`);
+    return this.http.get<EnclosureCleaning[]>(`${this.cleaningLogUrl}/enclosure/${enclosureId}`);
   }
 
-  addEnclosureCleaningLog(enclosureId: number, log: Omit<EnclosureCleaning, 'id' | 'enclosureId'>): Observable<EnclosureCleaning> {
-    return this.http.post<EnclosureCleaning>(`/api/enclosures/${enclosureId}/cleaning`, log);
+  addEnclosureCleaningLog(log: Omit<EnclosureCleaning, 'id'>): Observable<EnclosureCleaning> {
+    return this.http.post<EnclosureCleaning>(this.cleaningLogUrl, log);
   }
 
   // Dashboard statistics

@@ -68,13 +68,13 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  Last Fed: {{ getDaysAgo(reptile.lastFedDate) }}
+                  Last Fed: {{ getDaysAgo(lastFedDate()) }}
                 </div>
                 <div class="flex items-center gap-1 text-sm text-base-content/60">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Last Shed: {{ getDaysAgo(reptile.lastShedDate) }}
+                  Last Shed: {{ getDaysAgo(lastShedDate()) }}
                 </div>
               </div>
             </div>
@@ -203,15 +203,15 @@
             <div class="grid grid-cols-2 gap-3 mt-2">
               <div class="text-center p-3 rounded-lg bg-base-200/50">
                 <p class="text-[10px] uppercase text-base-content/50 font-bold">Last Fed</p>
-                <p class="text-sm font-medium">{{ reptile.lastFedDate ? (reptile.lastFedDate | date:'shortDate') : 'Never' }}</p>
+                <p class="text-sm font-medium">{{ lastFedDate() ? (lastFedDate() | date:'shortDate') : 'Never' }}</p>
               </div>
               <div class="text-center p-3 rounded-lg bg-base-200/50">
                 <p class="text-[10px] uppercase text-base-content/50 font-bold">Last Shed</p>
-                <p class="text-sm font-medium">{{ reptile.lastShedDate ? (reptile.lastShedDate | date:'shortDate') : 'Never' }}</p>
+                <p class="text-sm font-medium">{{ lastShedDate() ? (lastShedDate() | date:'shortDate') : 'Never' }}</p>
               </div>
               <div class="text-center p-3 rounded-lg bg-base-200/50">
                 <p class="text-[10px] uppercase text-base-content/50 font-bold">Last Clean</p>
-                <p class="text-sm font-medium">{{ reptile.lastCleanedDate ? (reptile.lastCleanedDate | date:'shortDate') : 'Never' }}</p>
+                <p class="text-sm font-medium">{{ lastCleanedDate() ? (lastCleanedDate() | date:'shortDate') : 'Never' }}</p>
               </div>
               <div class="text-center p-3 rounded-lg bg-base-200/50">
                 <p class="text-[10px] uppercase text-base-content/50 font-bold">Acquired</p>
@@ -219,12 +219,21 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-block mt-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Log Activity
-            </button>
+            <div class="relative mt-4">
+              <button class="btn btn-primary btn-block" (click)="toggleActivityMenu()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Log Activity
+              </button>
+              @if (showActivityMenu()) {
+                <ul class="menu bg-base-200 rounded-box w-full mt-2 shadow-lg z-20 absolute">
+                  <li><a (click)="openFeedingModal()">Log Feeding</a></li>
+                  <li><a (click)="openSheddingModal()">Log Shedding</a></li>
+                  <li><a (click)="openCleaningModal()">Log Enclosure Cleaning</a></li>
+                </ul>
+              }
+            </div>
           </div>
         </div>
       </aside>
@@ -331,6 +340,13 @@
                             }
                           </td>
                           <td class="text-sm text-base-content/60">{{ log.notes || '-' }}</td>
+                          <td>
+                            <button class="btn btn-ghost btn-xs text-error" (click)="onDeleteFeedingLog(log.id)">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </td>
                         </tr>
                       }
                     </tbody>
@@ -400,6 +416,13 @@
                             }
                           </td>
                           <td class="text-sm text-base-content/60 max-w-xs truncate">{{ log.notes || '-' }}</td>
+                          <td>
+                            <button class="btn btn-ghost btn-xs text-error" (click)="onDeleteFeedingLog(log.id)">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </td>
                         </tr>
                       }
                     </tbody>
@@ -411,17 +434,81 @@
         }
 
         @if (activeTab() === 'health') {
-          <!-- Health & Shed Tab Content -->
+          <!-- Shedding Logs -->
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
-              <h3 class="card-title">Health & Shedding</h3>
-              <div class="text-center py-12 text-base-content/60">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
-                <p class="text-lg font-medium">Health tracking coming soon</p>
-                <p class="text-sm">Shedding logs and health records will appear here</p>
+              <div class="flex justify-between items-center">
+                <h3 class="card-title">Shedding History</h3>
+                <button class="btn btn-primary btn-sm gap-1" (click)="openSheddingModal()">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Log Shedding
+                </button>
               </div>
+
+              @if (sheddingLogsLoading()) {
+                <div class="flex justify-center py-8">
+                  <span class="loading loading-spinner loading-md"></span>
+                </div>
+              } @else if (sheddingLogs().length === 0) {
+                <div class="text-center py-12 text-base-content/60">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <p class="text-lg font-medium">No shedding logs yet</p>
+                  <p class="text-sm">Start tracking {{ reptile.name }}'s sheds</p>
+                </div>
+              } @else {
+                <div class="overflow-x-auto mt-4">
+                  <table class="table table-zebra">
+                    <thead>
+                      <tr class="text-xs uppercase">
+                        <th>Date</th>
+                        <th>Quality</th>
+                        <th>Ate Shed</th>
+                        <th>Notes</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (log of sheddingLogs(); track log.id) {
+                        <tr class="hover">
+                          <td class="text-sm">{{ log.sheddingDate | date:'mediumDate' }}</td>
+                          <td class="text-sm">
+                            @switch (log.shedQuality) {
+                              @case ('COMPLETE') {
+                                <span class="badge badge-success badge-sm">Complete</span>
+                              }
+                              @case ('PARTIAL') {
+                                <span class="badge badge-warning badge-sm">Partial</span>
+                              }
+                              @case ('INCOMPLETE') {
+                                <span class="badge badge-error badge-sm">Incomplete</span>
+                              }
+                            }
+                          </td>
+                          <td class="text-sm">
+                            @if (log.ateShed) {
+                              <span class="badge badge-info badge-sm">Yes</span>
+                            } @else {
+                              <span class="badge badge-ghost badge-sm">No</span>
+                            }
+                          </td>
+                          <td class="text-sm text-base-content/60 max-w-xs truncate">{{ log.notes || '-' }}</td>
+                          <td>
+                            <button class="btn btn-ghost btn-xs text-error" (click)="onDeleteSheddingLog(log.id)">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
             </div>
           </div>
         }
@@ -1002,6 +1089,201 @@
       </div>
       <form method="dialog" class="modal-backdrop">
         <button (click)="cancelFeeding()">close</button>
+      </form>
+    </div>
+  }
+
+  <!-- Shedding Log Modal -->
+  @if (showSheddingModal()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-lg">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="bg-warning/10 p-2 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg">Log Shedding</h3>
+              <p class="text-sm text-base-content/60">Record a shed for {{ reptile()?.name }}</p>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm btn-circle" (click)="cancelShedding()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form [formGroup]="sheddingForm" (ngSubmit)="onSubmitShedding()">
+          <div class="space-y-4">
+            <!-- Date/Time -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Date & Time <span class="text-error">*</span></span>
+              </label>
+              <input type="datetime-local" formControlName="sheddingDate" class="input input-bordered w-full" />
+            </div>
+
+            <!-- Shed Quality -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Shed Quality <span class="text-error">*</span></span>
+              </label>
+              <div class="flex gap-2">
+                @for (option of shedQualityOptions; track option.value) {
+                  <label class="flex-1 cursor-pointer">
+                    <input type="radio" formControlName="shedQuality" [value]="option.value" class="hidden peer" />
+                    <div class="p-3 text-center rounded-lg border-2 border-base-300 peer-checked:border-primary peer-checked:bg-primary/10 transition-all hover:border-primary/50">
+                      <span class="text-sm font-medium">{{ option.label }}</span>
+                    </div>
+                  </label>
+                }
+              </div>
+            </div>
+
+            <!-- Ate Shed Toggle -->
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-3">
+                <input type="checkbox" formControlName="ateShed" class="toggle toggle-warning" />
+                <div>
+                  <span class="label-text font-medium">Ate the shed skin</span>
+                  <p class="text-xs text-base-content/50">Check if the reptile consumed its shed</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Notes</span>
+              </label>
+              <textarea formControlName="notes" class="textarea textarea-bordered h-20 resize-none"
+                placeholder="Any observations about the shed (stuck shed, issues, etc.)..."></textarea>
+            </div>
+          </div>
+
+          <div class="modal-action">
+            <button type="button" class="btn btn-ghost" (click)="cancelShedding()" [disabled]="sheddingLoading()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="sheddingLoading() || sheddingForm.invalid">
+              @if (sheddingLoading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+                Saving...
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Save Shedding Log
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button (click)="cancelShedding()">close</button>
+      </form>
+    </div>
+  }
+
+  <!-- Cleaning Log Modal -->
+  @if (showCleaningModal()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-lg">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="bg-info/10 p-2 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg">Log Enclosure Cleaning</h3>
+              <p class="text-sm text-base-content/60">Record cleaning for enclosure #{{ reptile()?.enclosureId }}</p>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm btn-circle" (click)="cancelCleaning()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form [formGroup]="cleaningForm" (ngSubmit)="onSubmitCleaning()">
+          <div class="space-y-4">
+            <!-- Date/Time -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Date & Time <span class="text-error">*</span></span>
+              </label>
+              <input type="datetime-local" formControlName="cleaningDate" class="input input-bordered w-full" />
+            </div>
+
+            <!-- Cleaning Type -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Cleaning Type <span class="text-error">*</span></span>
+              </label>
+              <select formControlName="cleaningType" class="select select-bordered w-full">
+                @for (option of cleaningTypeOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-3">
+                <input type="checkbox" formControlName="substrateChanged" class="toggle toggle-info" />
+                <div>
+                  <span class="label-text font-medium">Substrate changed</span>
+                  <p class="text-xs text-base-content/50">Check if the substrate was replaced</p>
+                </div>
+              </label>
+            </div>
+
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-3">
+                <input type="checkbox" formControlName="disinfected" class="toggle toggle-info" />
+                <div>
+                  <span class="label-text font-medium">Disinfected</span>
+                  <p class="text-xs text-base-content/50">Check if the enclosure was disinfected</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Notes</span>
+              </label>
+              <textarea formControlName="notes" class="textarea textarea-bordered h-20 resize-none"
+                placeholder="Any observations about the cleaning..."></textarea>
+            </div>
+          </div>
+
+          <div class="modal-action">
+            <button type="button" class="btn btn-ghost" (click)="cancelCleaning()" [disabled]="cleaningLoading()">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="cleaningLoading() || cleaningForm.invalid">
+              @if (cleaningLoading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+                Saving...
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Save Cleaning Log
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button (click)="cancelCleaning()">close</button>
       </form>
     </div>
   }

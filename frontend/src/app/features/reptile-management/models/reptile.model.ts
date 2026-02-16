@@ -44,11 +44,14 @@ export interface WeightLog {
   notes?: string;
 }
 
+export type ShedQuality = 'COMPLETE' | 'PARTIAL' | 'INCOMPLETE';
+
 export interface SheddingLog {
   id: number;
   reptileId: number;
-  shedDate: string;
-  quality: 'COMPLETE' | 'PARTIAL' | 'INCOMPLETE';
+  sheddingDate: string;
+  shedQuality: ShedQuality;
+  ateShed: boolean;
   notes?: string;
 }
 
@@ -64,11 +67,15 @@ export interface PoopLog {
   notes?: string;
 }
 
+export type CleaningType = 'SPOT_CLEAN' | 'FULL_CLEAN' | 'WATER_CHANGE' | 'DEEP_CLEAN';
+
 export interface EnclosureCleaning {
   id: number;
   enclosureId: number;
   cleaningDate: string;
-  cleaningType: 'FULL' | 'SPOT' | 'WATER_CHANGE';
+  cleaningType: CleaningType;
+  substrateChanged: boolean;
+  disinfected: boolean;
   notes?: string;
 }
 
