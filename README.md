@@ -5,20 +5,21 @@ A comprehensive web application designed to help reptile enthusiasts and profess
 ## Screenshots
 
 ### Dashboard Overview
-![Dashboard](docs/screenshots/dashboard.png)
+
+<img width="1894" height="1054" alt="image" src="https://github.com/user-attachments/assets/e14bb079-bfa8-457c-935e-8a77ea7e41ba" />
 *Main dashboard showing reptile collection at a glance*
 
 ### Reptile Details
-![Reptile Details](docs/screenshots/reptile-detail.png)
+<img width="1894" height="1054" alt="image" src="https://github.com/user-attachments/assets/ae367fc4-370f-4ee5-b4d0-5f8ca3721fe3" />
 *Detailed view with feeding logs, weight tracking, and shedding history*
 
-### Weight Tracking
-![Weight Chart](docs/screenshots/weight-chart.png)
-*Visual weight monitoring over time*
-
 ### Feeding Schedule
-![Feeding Logs](docs/screenshots/feeding-logs.png)
+<img width="1894" height="1054" alt="image" src="https://github.com/user-attachments/assets/2bf21c67-ef0f-4c09-bb00-ad9b3c19c6aa" />
 *Track feeding schedules and dietary information*
+
+### Weight Tracking
+<img width="1894" height="1054" alt="image" src="https://github.com/user-attachments/assets/1eb63b99-2e82-4d72-bdc9-6b18ffbe174a" />
+*Visual weight monitoring over time*
 
 ## Features
 
