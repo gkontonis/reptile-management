@@ -10,8 +10,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
 
-# Install dependencies
-RUN pnpm install --no-frozen-lockfile
+# Use copy mode instead of hardlinks (fixes EAGAIN on ZFS/TrueNAS)
+RUN pnpm config set package-import-method copy && \
+    pnpm install --no-frozen-lockfile
 
 # Copy source files
 COPY . .
