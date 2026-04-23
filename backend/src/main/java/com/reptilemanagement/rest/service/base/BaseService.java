@@ -48,13 +48,13 @@ public abstract class BaseService<Id, Entity extends BaseEntity<Id>, Dto extends
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") // it's an abstract class
     @Autowired
-    public final void setAuditService(AuditService auditService) {
+    public void setAuditService(AuditService auditService) {
         this.auditService = auditService;
     }
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    public final void setAuthenticationInformationProvider(AuthenticationInformationProvider authenticationInformationProvider) {
+    public void setAuthenticationInformationProvider(AuthenticationInformationProvider authenticationInformationProvider) {
         this.authenticationInformationProvider = authenticationInformationProvider;
     }
 
