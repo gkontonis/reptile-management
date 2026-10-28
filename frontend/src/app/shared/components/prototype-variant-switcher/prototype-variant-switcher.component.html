@@ -1,0 +1,24 @@
+@if (devMode && variants().length > 0) {
+  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-full bg-neutral text-neutral-content shadow-lg px-2 py-2 text-sm">
+    <button type="button" class="btn btn-circle btn-xs btn-ghost text-neutral-content" (click)="cycle(-1)" aria-label="Previous variant">
+      ‹
+    </button>
+    <div class="flex items-center gap-1 px-2">
+      @for (option of variants(); track option.key) {
+        <button
+          type="button"
+          class="px-2 py-1 rounded-full font-medium transition-colors"
+          [class.bg-neutral-content]="option.key === current()"
+          [class.text-neutral]="option.key === current()"
+          [class.opacity-60]="option.key !== current()"
+          (click)="select(option.key)"
+        >
+          {{ option.key }}: {{ option.label }}
+        </button>
+      }
+    </div>
+    <button type="button" class="btn btn-circle btn-xs btn-ghost text-neutral-content" (click)="cycle(1)" aria-label="Next variant">
+      ›
+    </button>
+  </div>
+}

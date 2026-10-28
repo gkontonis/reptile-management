@@ -1,14 +1,15 @@
 import { Component, OnInit, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Reptile } from '../models/reptile.model';
 import { ReptileService } from '../services/reptile.service';
+import { PrototypeVariantSwitcherComponent, PrototypeVariantOption } from '../../../shared/components/prototype-variant-switcher/prototype-variant-switcher.component';
 
 @Component({
   selector: 'app-reptile-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, PrototypeVariantSwitcherComponent],
   templateUrl: './reptile-list.component.html',
   styleUrls: ['./reptile-list.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,6 +17,7 @@ import { ReptileService } from '../services/reptile.service';
 export class ReptileListComponent implements OnInit {
   private reptileService = inject(ReptileService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   reptiles = signal<Reptile[]>([]);
   loading = signal<boolean>(false);
@@ -26,6 +28,28 @@ export class ReptileListComponent implements OnInit {
   selectedSpecies = signal<string>('all');
   sortBy = signal<string>('recent');
 
+
+  // PROTOTYPE: ?variant= switches the landing page layout while reusing
+  // the same data below. See reptile-list.component.html for the three
+  // variants. Drop this signal, the switcher, and the losing variants
+  // once one is picked.
+  variant = signal<'A' | 'B' | 'C'>('A');
+  readonly variantOptions: PrototypeVariantOption[] = [
+    { key: 'A', label: 'Toolbar, no sidebar' },
+    { key: 'B', label: 'Table view' },
+    { key: 'C', label: 'Hero stats + chips' }
+  ];
+
+  setVariant(key: string): void {
+    if (key !== 'A' && key !== 'B' && key !== 'C') return;
+    this.variant.set(key);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { variant: key },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
   // Get unique species from reptiles for the filter dropdown
   uniqueSpecies = computed(() => {
     const species = new Set(this.reptiles().map(r => r.species));
@@ -75,6 +99,10 @@ export class ReptileListComponent implements OnInit {
   activeCount = computed(() => this.reptiles().filter(r => r.status === 'ACTIVE').length);
 
   ngOnInit(): void {
+    const variantParam = this.route.snapshot.queryParamMap.get('variant');
+    if (variantParam === 'A' || variantParam === 'B' || variantParam === 'C') {
+      this.variant.set(variantParam);
+    }
     this.loadReptiles();
   }
 
