@@ -34,3 +34,4 @@ frontend/pnpm-lock.yaml
 
 # Misc
 *.backup
+.claude/settings.local.json

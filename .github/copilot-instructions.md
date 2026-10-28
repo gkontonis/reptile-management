@@ -1,5 +1,7 @@
 # Copilot Instructions - Reptile Management
 
+> Kept in sync with [`AGENTS.md`](../AGENTS.md) by hand (no import support here) — update both when this changes.
+
 ## General Principles
 
 ### Think Before Coding
@@ -61,150 +63,124 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
----
-
 ## Technology Stack
 
 - **Frontend**: Angular 21, TypeScript, Tailwind CSS v4, DaisyUI
-- **Backend**: Java 21, Spring Boot 4.0, Spring Security with JWT
+- **Backend**: Java 21, Spring Boot 4.0, Spring Security with JWT authentication
 - **Database**: PostgreSQL 17
-- **Build**: Maven (backend), npm/Angular CLI (frontend), Docker Compose
 - **Mapping**: MapStruct with Lombok
+- **Build**: Maven (backend), npm/Angular CLI (frontend), Docker Compose
+- **Deployment**: Docker Compose with Nginx
 
-## Backend Conventions
+## Development Commands
 
-### Package Structure
+```bash
+# Docker (primary)
+docker-compose up -d                        # start all services
+docker-compose down                         # stop all
+docker-compose down -v                      # full reset (destroys data)
+docker-compose up -d --build frontend       # rebuild frontend only
+docker-compose up -d --build backend        # rebuild backend only
+docker-compose logs -f [frontend|backend]   # stream logs
 
-```
-com.reptilemanagement
-├── persistence.domain       # JPA entities
-├── persistence.domain.base  # BaseEntity, EntityUpdatable
-├── persistence.dto          # DTOs extending BaseDto
-├── persistence.mapper       # MapStruct mappers extending BaseMapper
-├── persistence.repository   # Spring Data JPA repositories
-├── rest.controller          # REST endpoints
-├── rest.service             # Business logic extending BaseCrudService
-├── rest.service.base        # BaseCrudService, BaseService
-├── security                 # JWT auth, SecurityConfig
-└── shared.audit             # AuditService, audit logging
-```
+# Database only (local dev)
+docker-compose up -d db
+docker exec -it reptile-management-db psql -U postgres -d reptilemanagement
 
-### Entity Pattern
+# Frontend (outside Docker)
+cd frontend && npm install && npm start     # http://localhost:4200
+npm run build:prod
 
-Entities extend `BaseEntity<Long>` and implement `EntityUpdatable<Dto>`. The `update(Dto)` method defines which fields are mutable:
-
-```java
-@Entity
-@Table(name = "reptiles")
-@Data
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class Reptile extends BaseEntity<Long> implements EntityUpdatable<ReptileDto> {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Override
-    public void update(ReptileDto dto) {
-        this.name = dto.getName();
-        // only mutable fields here
-    }
-}
+# Backend (outside Docker)
+cd backend && ./mvnw spring-boot:run       # http://localhost:8081
+./mvnw clean install
 ```
 
-### Service Pattern
+## Architecture Overview
 
-Services extend `BaseCrudService<Id, Entity, Dto>` which provides CRUD + audit logging. Override `getRepository()`, `getMapper()`, and `handleEntityRelationships()` for associations:
+### Backend
 
-```java
-@Service
-@RequiredArgsConstructor
-@Slf4j
-@Transactional
-public class ReptileService extends BaseCrudService<Long, Reptile, ReptileDto> {
-    private final ReptileRepository reptileRepository;
-    private final ReptileMapper reptileMapper;
+Layered architecture: controller → service → repository → entity.
 
-    @Override
-    protected JpaRepository<Reptile, Long> getRepository() { return reptileRepository; }
+**Package Structure** (`com.reptilemanagement`):
+- `rest.controller` - REST endpoints
+- `rest.service` / `rest.service.base` - Business logic + `BaseCrudService`
+- `persistence.domain` / `persistence.domain.base` - JPA entities + `BaseEntity`
+- `persistence.repository` - Spring Data JPA repositories
+- `persistence.dto` - DTOs
+- `persistence.mapper` - MapStruct mappers
+- `security` - JWT filter, Spring Security config
+- `shared.audit` - Audit logging
+- `shared.auth` / `shared.constants` - Auth helpers, constants
+- `config` - App configuration beans
+- `exception` - Custom exception types
 
-    @Override
-    protected BaseMapper<Reptile, ReptileDto> getMapper() { return reptileMapper; }
-}
-```
+**Key Patterns:**
 
-### Java Style
+- **`BaseCrudService<Id, Entity, Dto>`** — all services extend this; provides CRUD + audit logging + validation. Override `handleEntityRelationships()` for associations.
+- **`EntityUpdatable<Dto>`** — entities implement `update(Dto dto)` to define mutable fields; prevents accidental overwrites.
+- **MapStruct + Lombok** — mappers extend `BaseMapper`; annotation processors wired in `maven-compiler-plugin`.
+- **Flyway** — schema managed via `db/migration/` SQL scripts; `FlywayConfig` ensures migrations complete before JPA validation.
+- **Security** — JWT with refresh tokens; `JwtAuthenticationFilter` validates tokens; public endpoints: `/api/auth/**`, `/api-docs/**`. All other resources are user-scoped: verify ownership via `authenticationInformationProvider.getAuthenticatedUserId()`.
 
-- Use Lombok (`@Data`, `@RequiredArgsConstructor`, `@Slf4j`) to reduce boilerplate
-- Use SLF4J logging, never `System.out.println`
-- Use Java 21 features: records, switch expressions, text blocks, pattern matching
-- All resources are user-scoped: verify ownership via `authenticationInformationProvider.getAuthenticatedUserId()`
-- Public endpoints: `/api/auth/**`, `/api-docs/**`. Everything else requires JWT
+### Frontend
 
-## Frontend Conventions
+Feature-based Angular architecture with standalone components.
 
-### Angular 21 Rules
+**Directory Structure** (`src/app`):
+- `core/` — guards (`authGuard`, `adminGuard`), interceptors (JWT injection), services (auth, user, theme), `config/` (feature flags + registry)
+- `features/` — `reptile-management`, `auth`, `profile-settings`, `admin`
+- `components/` — reusable UI components
+- `shared/` — navbar, sidebar, confirmation-dialog
 
-- Standalone components only. Do NOT set `standalone: true` in decorators (it's the default in v21+)
-- Use `input()` / `output()` functions, not `@Input` / `@Output` decorators
-- Use `computed()` for derived state
-- Use `inject()` function, not constructor injection
-- Use native control flow: `@if`, `@for`, `@switch` (not `*ngIf`, `*ngFor`)
-- Do NOT use `ngClass` or `ngStyle` -- use class/style bindings
-- State management via RxJS + services (no NgRx)
-
-### Directory Structure
-
-```
-src/app/
-├── core/
-│   ├── config/       # feature-flags.ts, feature-registry.ts
-│   ├── guards/       # authGuard, adminGuard
-│   ├── interceptors/ # auth.interceptor (adds JWT to requests)
-│   └── services/     # auth, user, theme services
-├── features/
-│   ├── auth/
-│   ├── reptile-management/  # add-reptile, reptile-list, reptile-detail
-│   ├── admin/
-│   └── profile-settings/
-└── shared/           # navbar, sidebar, confirmation-dialog
-```
-
-### Feature Flag System
-
-New features must be registered in two places:
-1. `feature-flags.ts` -- add flag to `FEATURE_FLAGS` object
-2. `feature-registry.ts` -- add `FEATURE_CONFIGS` entry with lazy-loaded routes and nav items
-
-### Tailwind CSS
-
-- Never use dynamic class interpolation (`bg-${color}-500`). Use object maps with complete class names
-- Follow Tailwind Prettier plugin class order
+**Key Patterns:**
+- **Feature flags** (`feature-flags.ts`): `reptileManagement: true`, `userManagement: true`, `todos: false`
+- **Feature registry** (`feature-registry.ts`): lazy-loaded routes + nav items driven by flags; register in `FEATURE_CONFIGS`
+- **State**: RxJS + services only (no NgRx)
 
 ## Domain Model
 
-- **User** (ADMIN, USER roles) -- owns Reptiles and Enclosures
-- **Reptile** -- species, morph, gender, birthDate, status. Has many: FeedingLog, WeightLog, SheddingLog, ReptileImage. Belongs to: Enclosure
-- **Enclosure** -- has many: Reptile, EnclosureCleaning
-- **FeedingLog** / **WeightLog** / **SheddingLog** / **PoopLog** -- timestamped event logs per reptile
-- **ReptileImage** -- photos stored as base64
+- **User** — roles: ADMIN, USER
+- **Reptile** → belongs to Enclosure; has many: FeedingLog, WeightLog, SheddingLog, PoopLog, ReptileImage
+- **Enclosure** → has many: Reptile, EnclosureCleaning
+- **FeedingLog**, **WeightLog**, **SheddingLog**, **PoopLog** — reptile event logs
+- **ReptileImage** — stored as base64
+- **EnclosureCleaning** — maintenance records
 
-All entities have audit fields (createdAt, createdBy, updatedAt, updatedBy) via BaseEntity.
+Swagger UI: `http://localhost:8081/swagger-ui/index.html`
 
-## Adding a New Backend Feature
+## Adding New Features
 
-1. Entity in `persistence.domain` extending `BaseEntity<Long>` + `EntityUpdatable<Dto>`
-2. DTO in `persistence.dto` extending `BaseDto<Long>`
+**Backend checklist:**
+1. Entity in `persistence.domain` extending `BaseEntity`, implementing `EntityUpdatable<Dto>`
+2. DTO in `persistence.dto` extending `BaseDto`
 3. Repository in `persistence.repository` extending `JpaRepository`
-4. MapStruct mapper in `persistence.mapper` extending `BaseMapper`
+4. Mapper in `persistence.mapper` extending `BaseMapper`
 5. Service in `rest.service` extending `BaseCrudService`
-6. Controller in `rest.controller` with `@RestController` and `@RequestMapping`
-7. Override `handleEntityRelationships()` if the entity has associations
+6. Controller in `rest.controller` with `@RestController` + `@RequestMapping`
+7. Flyway migration script in `db/migration/` if schema changes
+8. Override `handleEntityRelationships()` if entity has associations
 
-## Adding a New Frontend Feature
+**Frontend checklist:**
+1. Feature directory in `src/app/features/`
+2. Feature flag in `FEATURE_FLAGS` (`feature-flags.ts`)
+3. Feature config in `FEATURE_CONFIGS` (`feature-registry.ts`) with lazy-loaded routes
 
-1. Create directory under `src/app/features/`
-2. Add flag to `FEATURE_FLAGS`
-3. Register in `FEATURE_CONFIGS` with routes and navigation
-4. Routes are auto-included when the flag is enabled
+## General Coding
+
+**Angular 21:**
+- Do NOT set `standalone: true` — it's the default in v21+
+- Use `input()` / `output()` functions, not decorators
+- Use `computed()` for derived state
+- Native control flow: `@if`, `@for`, `@switch` — not `*ngIf`, `*ngFor`
+- `inject()` for DI — not constructor injection
+- Class bindings over `ngClass`; style bindings over `ngStyle`
+
+**Java / Spring Boot:**
+- Lombok for boilerplate; Google style indentation
+- Java 21 features encouraged: records, switch expressions, text blocks, pattern matching
+- SLF4J for logging — no `System.out.println`
+
+**Tailwind CSS:**
+- No dynamic interpolation (`bg-${color}-500` gets purged) — use full class name maps
+- Follow Prettier plugin class ordering
