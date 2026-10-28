@@ -4,11 +4,12 @@ import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } 
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ReptileDetail, ReptileImage, FeedingLog, SheddingLog, EnclosureCleaning, WeightLog } from '../models/reptile.model';
 import { ReptileService } from '../services/reptile.service';
+import { PrototypeVariantSwitcherComponent, PrototypeVariantOption } from '../../../shared/components/prototype-variant-switcher/prototype-variant-switcher.component';
 
 @Component({
   selector: 'app-reptile-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, PrototypeVariantSwitcherComponent],
   templateUrl: './reptile-detail.component.html',
   styleUrls: ['./reptile-detail.component.css']
 })
@@ -21,6 +22,28 @@ export class ReptileDetailComponent implements OnInit {
   reptile = signal<ReptileDetail | null>(null);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
+
+  // PROTOTYPE: ?variant= switches the identity/stats layout below while
+  // reusing the same data and the rest of the page. See
+  // reptile-detail.component.html for the three variants. Drop this signal,
+  // the switcher, and the losing variants once one is picked.
+  variant = signal<'A' | 'B' | 'C'>('A');
+  readonly variantOptions: PrototypeVariantOption[] = [
+    { key: 'A', label: 'Flat single column' },
+    { key: 'B', label: 'Flat panels' },
+    { key: 'C', label: 'Dense strip' }
+  ];
+
+  setVariant(key: string): void {
+    if (key !== 'A' && key !== 'B' && key !== 'C') return;
+    this.variant.set(key);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { variant: key },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
 
   // Tab state
   activeTab = signal<'overview' | 'feeding' | 'health'>('overview');
@@ -189,6 +212,10 @@ export class ReptileDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
+    const variantParam = this.route.snapshot.queryParamMap.get('variant');
+    if (variantParam === 'A' || variantParam === 'B' || variantParam === 'C') {
+      this.variant.set(variantParam);
+    }
     if (id) {
       this.loadReptile(+id);
       this.loadImages(+id);
